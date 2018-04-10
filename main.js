@@ -18,10 +18,27 @@ function saveUNQfy(unqfy, filename) {
   console.log();
   unqfy.save(filename);
 }
+function llamarMetodo(unqfyst,parametros){
+  switch(parametros[0]){
+    case "addArtist":
+      console.log(parametros)
+     unqfyst.addArtist(parametros[1],parametros[2]);
+    console.log(unqfyst.artistas);
+    console.log(unqfyst.getArtistByName(parametros[1]));
+    break;
+    
+    
+  }
+}
 
 function main() {
+  let unqfy = getUNQfy('estado');
+  let parametros = process.argv.slice(2);
   console.log('arguments: ');
-  process.argv.forEach(argument => console.log(argument));
+  parametros.forEach(argument => console.log(argument));
+  llamarMetodo(unqfy,parametros)
+
+  saveUNQfy(unqfy, 'estado');
 }
 
 main();
