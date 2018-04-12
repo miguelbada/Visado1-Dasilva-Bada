@@ -21,10 +21,9 @@ function saveUNQfy(unqfy, filename) {
 function llamarMetodo(unqfyst,parametros){
   switch(parametros[0]){
     case "addArtist":
-      console.log(parametros)
-     unqfyst.addArtist(parametros[1],parametros[2]);
+     unqfyst.addArtist({name:parametros[1],country:parametros[2]});
     console.log(unqfyst.artistas);
-    console.log(unqfyst.getArtistByName(parametros[1]));
+    //console.log(unqfyst.getArtistByName(parametros[1]));
     break;
     
     
