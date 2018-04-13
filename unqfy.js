@@ -5,29 +5,46 @@ class Artista {
   constructor(nombre, pais) {
     this.name = nombre;
     this.country = pais;
-    console.log(nombre+pais);
-}
-}
-
-class Album {
-  constructor(nombre, _artista) {
-    this.name = nombre;
-    this.artista = _artista;
-    this.pistas = [];
   }
 }
 
+class Album {
+  constructor(_artista, nombre, _year) {
+    this.name = nombre;
+    this.artista = _artista;
+    this.pistas = [];
+    this.year = _year
+   }
+}
+
 class Track {
-  constructor(nombre, duracion, genero) {
+  constructor(nombreAlbun,nombre, duracion, genero) {
+    this.albun = nombreAlbun;
     this.name = nombre;
     this.duration = duracion;
-    this.gender = genero
+    this.genres = genero;
   }
 }
 
 class Playlist{
-  constructor(){
+  constructor(_name){
+    this.name = _name;
     this.pistas = [];
+  }
+
+  duration(){
+    let res = 0;
+    this.pistas.forEach(tr=> res+= tr.duration);
+    return res;
+  }
+
+  hasTrack(aTrack){
+    let res = this.pistas.some(tr=> tr.name === aTrack.name);
+    return res;
+  }
+
+  addTrackToPlay(aTrack){
+    this.pistas.push(aTrack)
   }
 }
 
@@ -42,10 +59,14 @@ class UNQfy {
   
   getTracksMatchingGenres(genres) {
     // Debe retornar todos los tracks que contengan alguno de los generos en el parametro genres
+    let tracksPL = this.tracks.filter(tr => tr.genres.includes(genres))
+    return tracksPL
 
   }
 
   getTracksMatchingArtist(artistName) {
+    let tracksAr = this.tracks.filter(tr => this.getAlbumByName(tr.albun).artista === artistName)
+    return tracksAr
 
   }
 
@@ -67,15 +88,30 @@ class UNQfy {
   */
   addAlbum(artistName, params) {
     // El objeto album creado debe tener (al menos) las propiedades name (string) y year
+    let artista = this.getArtistByName(artistName)
+    if(artista === undefined){
+      console.log("El artista "+ "¨"+artistName +"¨"+ " No Existe")
+    }else{
+          let nuevoAlbun = new Album(artistName, params.name, params.year)
+          this.albunes.push(nuevoAlbun)
+          
+    }
   }
 
 
   /* Debe soportar (al menos):
        params.name (string)
        params.duration (number)
-       params.genres (lista de strings)
+       params.genres (strings)
   */
   addTrack(albumName, params) {
+    let album = this.getAlbumByName(albumName)
+    if(album === undefined){
+      console.log("El Album "+ "¨"+albumName +"¨"+ " No Existe")
+    }else{
+          let nuevoTrack = new Track(albumName, params.name, params.duration, params.genres)
+          this.tracks.push(nuevoTrack)
+    }
     /* El objeto track creado debe soportar (al menos) las propiedades:
          name (string),
          duration (number),
@@ -90,17 +126,23 @@ class UNQfy {
   }
 
   getAlbumByName(name) {
+    let album = this.albunes.find(albun => albun.name === name)
+    return album
 
   }
 
   getTrackByName(name) {
+    let track = this.tracks.find(tr => tr.name === name)
+    return track
 
   }
 
   getPlaylistByName(name) {
+    let playlist = this.playlist.find(pl => pl.name === name)
+    return playlist
 
   }
-
+  //                Solo un genero
   addPlaylist(name, genresToInclude, maxDuration) {
     /* El objeto playlist creado debe soportar (al menos):
       * una propiedad name (string)
@@ -108,6 +150,28 @@ class UNQfy {
       * un metodo hasTrack(aTrack) que retorna true si aTrack se encuentra en la playlist
     */
 
+    /* Precondicion: Tiene que haber los tracks necensarios para que se puede rellenar la playList   
+    */
+    let nuevoPlayList = new Playlist(name)
+    let trackGener = this.getTracksMatchingGenres(genresToInclude)
+    while(nuevoPlayList.duration()< maxDuration){
+          let random = Math.floor((Math.random() * trackGener.length))
+          //console.log("Random: "+ random)
+          let track = trackGener[random]
+
+          if(!nuevoPlayList.hasTrack(track)){
+            nuevoPlayList.addTrackToPlay(track)
+          } 
+    } 
+    
+    // ASIGNACION DE TRACKS SIN RANDOMS 
+   /* let i;  
+    for (i = 0; i < this.tracks.length; i++) { 
+          if(this.tracks[i].genres.includes(genresToInclude)&& nuevoPlayList.duration()<= maxDuration){
+            nuevoPlayList.addTrackToPlay(this.tracks[i])
+          }
+    }*/
+    this.playlist.push(nuevoPlayList)
   }
 
   save(filename = 'unqfy.json') {
