@@ -18,4 +18,10 @@
 ### node main.js getPlaylistByName "ListaPop2"
 ### node main.js addPlaylist "ListaPop3" "Pop" "9"
 ### node main.js getPlaylistByName "ListaPop3"
+### node main.js getTracksMatchingGenres "Pop"
+### node main.js getTracksMatchingArtist "Pepe"
+### node main.js getArtistByName "Pepe"
+### node main.js getAlbumByName "Feliz"
+### node main.js getTrackByName "Sabroso"
+
   
