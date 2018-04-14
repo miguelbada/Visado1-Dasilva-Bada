@@ -5,23 +5,24 @@ class Artista {
   constructor(nombre, pais) {
     this.name = nombre;
     this.country = pais;
-    console.log(nombre+pais);
-}
+  }
 }
 
 class Album {
-  constructor(nombre, _artista) {
-    this.name = nombre;
+  constructor(_artista, nombre, _year) {
     this.artista = _artista;
+    this.name = nombre;
+    this.year = _year;
     this.pistas = [];
   }
 }
 
 class Track {
-  constructor(nombre, duracion, genero) {
+  constructor(nombreAlbum, nombre, duracion, genero) {
+    this.albumName = nombreAlbum;
     this.name = nombre;
     this.duration = duracion;
-    this.gender = genero
+    this.genres = genero
   }
 }
 
@@ -35,7 +36,7 @@ class Playlist{
 class UNQfy {
   constructor(){
     this.artistas = [];
-    this.albunes = [];
+    this.albumes = [];
     this.tracks = [];
     this.playlist = [];
   }
@@ -67,6 +68,8 @@ class UNQfy {
   */
   addAlbum(artistName, params) {
     // El objeto album creado debe tener (al menos) las propiedades name (string) y year
+    let nuevoAlbun = new Album(artistName, params.year, params.name);
+    this.albumes.push(nuevoAlbun);
   }
 
 
@@ -81,6 +84,8 @@ class UNQfy {
          duration (number),
          genres (lista de strings)
     */
+    let nuevoTrack = new Track(albumName, params.name, params.duration, params.genres);
+    this.tracks.push(nuevoTrack);
   }
 
   getArtistByName(name) {
@@ -90,11 +95,15 @@ class UNQfy {
   }
 
   getAlbumByName(name) {
+    let album = this.albumes.find(album => album.name === name);
 
+    return album;
   }
 
   getTrackByName(name) {
+    let pista = this.tracks.find(pista => pista.name === name);
 
+    return pista;
   }
 
   getPlaylistByName(name) {
