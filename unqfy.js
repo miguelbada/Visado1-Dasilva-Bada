@@ -14,7 +14,8 @@ class Album {
     this.name = nombre;
     this.year = _year;
     this.pistas = [];
-  }
+    this.year = _year
+   }
 }
 
 class Track {
@@ -27,8 +28,24 @@ class Track {
 }
 
 class Playlist{
-  constructor(){
+  constructor(_name){
+    this.name = _name;
     this.pistas = [];
+  }
+
+  duration(){
+    let res = 0;
+    this.pistas.forEach(tr=> res+= tr.duration);
+    return res;
+  }
+
+  hasTrack(aTrack){
+    let res = this.pistas.some(tr=> tr.name === aTrack.name);
+    return res;
+  }
+
+  addTrackToPlay(aTrack){
+    this.pistas.push(aTrack)
   }
 }
 
@@ -43,10 +60,14 @@ class UNQfy {
   
   getTracksMatchingGenres(genres) {
     // Debe retornar todos los tracks que contengan alguno de los generos en el parametro genres
+    let tracksPL = this.tracks.filter(tr => tr.genres.includes(genres))
+    return tracksPL
 
   }
 
   getTracksMatchingArtist(artistName) {
+    let tracksAr = this.tracks.filter(tr => this.getAlbumByName(tr.albun).artista === artistName)
+    return tracksAr
 
   }
 
@@ -76,9 +97,16 @@ class UNQfy {
   /* Debe soportar (al menos):
        params.name (string)
        params.duration (number)
-       params.genres (lista de strings)
+       params.genres (strings)
   */
   addTrack(albumName, params) {
+    let album = this.getAlbumByName(albumName)
+    if(album === undefined){
+      console.log("El Album "+ "¨"+albumName +"¨"+ " No Existe")
+    }else{
+          let nuevoTrack = new Track(albumName, params.name, params.duration, params.genres)
+          this.tracks.push(nuevoTrack)
+    }
     /* El objeto track creado debe soportar (al menos) las propiedades:
          name (string),
          duration (number),
@@ -107,9 +135,11 @@ class UNQfy {
   }
 
   getPlaylistByName(name) {
+    let playlist = this.playlist.find(pl => pl.name === name)
+    return playlist
 
   }
-
+  //                Solo un genero
   addPlaylist(name, genresToInclude, maxDuration) {
     /* El objeto playlist creado debe soportar (al menos):
       * una propiedad name (string)
@@ -117,6 +147,28 @@ class UNQfy {
       * un metodo hasTrack(aTrack) que retorna true si aTrack se encuentra en la playlist
     */
 
+    /* Precondicion: Tiene que haber los tracks necensarios para que se puede rellenar la playList   
+    */
+    let nuevoPlayList = new Playlist(name)
+    let trackGener = this.getTracksMatchingGenres(genresToInclude)
+    while(nuevoPlayList.duration()< maxDuration){
+          let random = Math.floor((Math.random() * trackGener.length))
+          //console.log("Random: "+ random)
+          let track = trackGener[random]
+
+          if(!nuevoPlayList.hasTrack(track)){
+            nuevoPlayList.addTrackToPlay(track)
+          } 
+    } 
+    
+    // ASIGNACION DE TRACKS SIN RANDOMS 
+   /* let i;  
+    for (i = 0; i < this.tracks.length; i++) { 
+          if(this.tracks[i].genres.includes(genresToInclude)&& nuevoPlayList.duration()<= maxDuration){
+            nuevoPlayList.addTrackToPlay(this.tracks[i])
+          }
+    }*/
+    this.playlist.push(nuevoPlayList)
   }
 
   save(filename = 'unqfy.json') {
