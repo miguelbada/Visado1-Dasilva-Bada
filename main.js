@@ -20,7 +20,7 @@ function saveUNQfy(unqfy, filename) {
 }
 
 function imprimirTracks(tracks){
-  tracks.forEach(argument=> console.log("Nombre: " +argument.name+","+ " Albun: "+ argument.albun+","+ "  Duracion: "+ argument.duration+","+" Genero: "+ argument.genres ));
+  tracks.forEach(argument=> console.log("Nombre: " +argument.name+","+ " Albun: "+ argument.albumName+","+ "  Duracion: "+ argument.duration+","+" Genero: "+ argument.genres ));
 }
 function llamarMetodo(unqfyst,parametros){
   switch(parametros[0]){
@@ -32,7 +32,7 @@ function llamarMetodo(unqfyst,parametros){
 
     case "addAlbum":
       unqfyst.addAlbum(parametros[1],{name:parametros[2], year:parseInt(parametros[3])});
-      console.log(unqfyst.albunes);
+      console.log(unqfyst.albumes);
       break;
 
     case "addTrack":
@@ -78,7 +78,7 @@ function llamarMetodo(unqfyst,parametros){
 
     case "getTrackByName":
       let trackGet = unqfyst.getTrackByName(parametros[1]);
-      console.log("Nombre: "+ trackGet.name +","+" Albun: "+ trackGet.albun+","+" Duracion: "+ trackGet.duration+", "+"Gemero: "+ trackGet.genres);
+      console.log("Nombre: "+ trackGet.name +","+" Albun: "+ trackGet.albumName+","+" Duracion: "+ trackGet.duration+", "+"Gemero: "+ trackGet.genres);
       break;
   }
 }

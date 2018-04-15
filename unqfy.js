@@ -14,7 +14,6 @@ class Album {
     this.name = nombre;
     this.year = _year;
     this.pistas = [];
-    this.year = _year
    }
 }
 
@@ -66,7 +65,7 @@ class UNQfy {
   }
 
   getTracksMatchingArtist(artistName) {
-    let tracksAr = this.tracks.filter(tr => this.getAlbumByName(tr.albun).artista === artistName)
+    let tracksAr = this.tracks.filter(tr => this.getAlbumByName(tr.albumName).artista === artistName)
     return tracksAr
 
   }
@@ -89,8 +88,13 @@ class UNQfy {
   */
   addAlbum(artistName, params) {
     // El objeto album creado debe tener (al menos) las propiedades name (string) y year
-    let nuevoAlbun = new Album(artistName, params.year, params.name);
-    this.albumes.push(nuevoAlbun);
+    let artista = this.getArtistByName(artistName)
+    if(artista === undefined){
+      console.log("El Album "+ "¨"+artistName +"¨"+ " No Existe")
+    }else{
+        let nuevoAlbun = new Album(artistName, params.name, params.year);
+        this.albumes.push(nuevoAlbun);
+     }
   }
 
 
@@ -112,8 +116,6 @@ class UNQfy {
          duration (number),
          genres (lista de strings)
     */
-    let nuevoTrack = new Track(albumName, params.name, params.duration, params.genres);
-    this.tracks.push(nuevoTrack);
   }
 
   getArtistByName(name) {
