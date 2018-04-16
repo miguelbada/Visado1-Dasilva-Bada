@@ -1,5 +1,7 @@
 # Visado1-Dasilva-Bada
 
+/home/miguel/UNQ/SeminarioCloudModernos/Visado1-Dasilva-Bada/uml.pdf
+
 ## Paso A Paso los comandos a ingresar 
 ### node main.js addArtist "Pepe" "Uruguay"
 ### node main.js addArtist "Carlos Gardel" "Uruguay"
