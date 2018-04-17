@@ -5,7 +5,7 @@ const libunqfy = require('./unqfy');
 
 
 function createAndAddArtist(unqfy, artistName, country) {
-  unqfy.addArtist({ name: artistName, country: country });
+  unqfy.addArtist({ name: artistName, country });
   const artist = unqfy.getArtistByName(artistName);
   return artist;
 }
@@ -58,24 +58,24 @@ describe('Add, remove and filter data', () => {
   it('should get all tracks matching genres', () => {
     createAndAddArtist(unqfy, 'Guns n\' Roses', 'USA');
     createAndAddAlbum(unqfy, 'Guns n\' Roses', 'Appetite for Destruction', 1987);
-    const t0 = createAndAddTrack(unqfy, 'Appetite for Destruction', 'Welcome to the jungle', 200, ['rock', 'hard rock', 'movie']);
-    const t1 = createAndAddTrack(unqfy, 'Appetite for Destruction', "Sweet Child o' Mine", 500, ['rock', 'hard rock', 'pop', 'movie']);
+    const t0 = createAndAddTrack(unqfy, 'Appetite for Destruction', 'Welcome to the jungle', 200, 'movie');
+    const t1 = createAndAddTrack(unqfy, 'Appetite for Destruction', "Sweet Child o' Mine", 500, 'movie');
 
     createAndAddArtist(unqfy, 'Michael Jackson', 'USA');
     createAndAddAlbum(unqfy, 'Michael Jackson', 'Thriller', 1987);
-    const t2 = createAndAddTrack(unqfy, 'Thriller', 'Trhiller', 200, ['pop', 'movie']);
-    createAndAddTrack(unqfy, 'Thriller', 'Another song', 500, ['classic']);
-    const t3 = createAndAddTrack(unqfy, 'Thriller', 'Another song II', 500, ['movie']);
+    const t2 = createAndAddTrack(unqfy, 'Thriller', 'Trhiller', 200, 'pop');
+    createAndAddTrack(unqfy, 'Thriller', 'Another song', 500, 'classic');
+    const t3 = createAndAddTrack(unqfy, 'Thriller', 'Another song II', 500, 'movie');
 
-    const tracksMatching = unqfy.getTracksMatchingGenres('pop');
+    const tracksMatching = unqfy.getTracksMatchingGenres(['pop', 'movie']);
 
     // assert.equal(tracks.matching.constructor.name, Array);
     assert.isArray(tracksMatching);
-    assert.lengthOf(tracksMatching, 2);
-    assert.equal(tracksMatching.includes(t0), false);
+    assert.lengthOf(tracksMatching, 4);
+    assert.equal(tracksMatching.includes(t0), true);
     assert.equal(tracksMatching.includes(t1), true);
     assert.equal(tracksMatching.includes(t2), true);
-    assert.equal(tracksMatching.includes(t3), false);
+    assert.equal(tracksMatching.includes(t3), true);
   });
 
   it('should get all tracks matching artist', () => {
@@ -139,8 +139,8 @@ describe('Playlist Creation and properties', () => {
   it('should create a playlist as requested', () => {
     createAndAddArtist(unqfy, 'Guns n\' Roses', 'USA');
     createAndAddAlbum(unqfy, 'Guns n\' Roses', 'Appetite for Destruction', 1987);
-    const t1 = createAndAddTrack(unqfy, 'Appetite for Destruction', 'Welcome to the jungle', 200, ['rock', 'hard rock', 'movie', 'pop']);
-    createAndAddTrack(unqfy, 'Appetite for Destruction', "Sweet Child o' Mine", 1500, ['rock', 'hard rock', 'movie']);
+    const t1 = createAndAddTrack(unqfy, 'Appetite for Destruction', 'Welcome to the jungle', 200, ['rock', 'hard rock', 'movie']);
+    createAndAddTrack(unqfy, 'Appetite for Destruction', "Sweet Child o' Mine", 1500, ['rock', 'hard rock', 'pop', 'movie']);
 
     createAndAddArtist(unqfy, 'Michael Jackson', 'USA');
     createAndAddAlbum(unqfy, 'Michael Jackson', 'Thriller', 1987);
@@ -148,7 +148,7 @@ describe('Playlist Creation and properties', () => {
     const t3 = createAndAddTrack(unqfy, 'Thriller', 'Another song', 500, ['pop']);
     const t4 = createAndAddTrack(unqfy, 'Thriller', 'Another song II', 500, ['pop']);
 
-    unqfy.addPlaylist('my playlist', 'pop', 1400);
+    unqfy.addPlaylist('my playlist', ['pop', 'rock'], 1400);
     const playlist = unqfy.getPlaylistByName('my playlist');
 
     assert.equal(playlist.name, 'my playlist');

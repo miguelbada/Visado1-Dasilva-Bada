@@ -5,6 +5,7 @@ class Artista {
   constructor(nombre, pais) {
     this.name = nombre;
     this.country = pais;
+    this.albumes = [];
   }
 }
 
@@ -23,6 +24,9 @@ class Track {
     this.name = nombre;
     this.duration = duracion;
     this.genres = genero
+  }
+  incluyeGenero(generos){
+    return generos.includes(this.genres);
   }
 }
 
@@ -52,22 +56,35 @@ class Playlist{
 class UNQfy {
   constructor(){
     this.artistas = [];
-    this.albumes = [];
-    this.tracks = [];
     this.playlist = [];
   }
   
+  getAllTracks(){
+    let res = [];
+    for (var i = 0; i < this.artistas.length; i++) {
+      for (var n = 0; n < this.artistas[i].albumes.length; n++) { 
+       res = res.concat(this.artistas[i].albumes[n].pistas);
+      }
+     }
+     return res;
+  }
+
   getTracksMatchingGenres(genres) {
     // Debe retornar todos los tracks que contengan alguno de los generos en el parametro genres
-    let tracksPL = this.tracks.filter(tr => tr.genres.includes(genres))
+    let tracks = this.getAllTracks(); 
+    let tracksPL = tracks.filter(tr => tr.incluyeGenero(genres));
     return tracksPL
-
   }
 
   getTracksMatchingArtist(artistName) {
-    let tracksAr = this.tracks.filter(tr => this.getAlbumByName(tr.albumName).artista === artistName)
-    return tracksAr
-
+    let artista = this.getArtistByName(artistName);
+    let res = [];
+    console.log(artista);
+    for (var i = 0; i < artista.albumes.length; i++) {
+      res = res.concat(artista.albumes[i].pistas);
+    } 
+    //let tracksAr = this.tracks.filter(tr => this.getAlbumByName(tr.albumName).artista === artistName)
+    return res;
   }
 
 
@@ -93,7 +110,7 @@ class UNQfy {
       console.log("El Album "+ "¨"+artistName +"¨"+ " No Existe")
     }else{
         let nuevoAlbun = new Album(artistName, params.name, params.year);
-        this.albumes.push(nuevoAlbun);
+        artista.albumes.push(nuevoAlbun);
      }
   }
 
@@ -109,7 +126,7 @@ class UNQfy {
       console.log("El Album "+ "¨"+albumName +"¨"+ " No Existe")
     }else{
           let nuevoTrack = new Track(albumName, params.name, params.duration, params.genres)
-          this.tracks.push(nuevoTrack)
+          album.pistas.push(nuevoTrack)
     }
     /* El objeto track creado debe soportar (al menos) las propiedades:
          name (string),
@@ -120,19 +137,30 @@ class UNQfy {
 
   getArtistByName(name) {
     let artista = this.artistas.find(artista => artista.name === name);
-
-    return artista;
+      return artista;
   }
 
   getAlbumByName(name) {
-    let album = this.albumes.find(album => album.name === name);
-
+    let album;
+    //let album = this.artistas.foreach(artista => artista.albumes.find(album => album.name === name));
+    for (var i = 0; i < this.artistas.length; i++) {
+       album = this.artistas[i].albumes.find(album => album.name === name)
+      //Do something
+  }
     return album;
   }
 
   getTrackByName(name) {
-    let pista = this.tracks.find(pista => pista.name === name);
-
+    let pista;
+    //let pista = this.tracks.find(pista => pista.name === name);
+    for (var i = 0; i < this.artistas.length; i++) {
+     for (var n = 0; n < this.artistas[i].albumes.length; n++) { 
+      pista = this.artistas[i].albumes[n].pistas.find(pista => pista.name === name);
+      
+     }
+    }
+     //Do something
+     //Do something
     return pista;
   }
 

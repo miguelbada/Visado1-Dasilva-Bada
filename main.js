@@ -68,7 +68,12 @@ function llamarMetodo(unqfyst,parametros){
      
     case "getArtistByName":
       let artistaL = unqfyst.getArtistByName(parametros[1]);
-      console.log("Nombre: "+ artistaL.name +","+" Pais: "+ artistaL.country);
+      if(artistaL === undefined){
+        console.log("El artista "+parametros[1]+","+" no se encuentra.");
+      }else{
+        console.log("Nombre: "+ artistaL.name +","+" Pais: "+ artistaL.country);
+      }
+      
       break;
 
     case "getAlbumByName":
