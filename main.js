@@ -86,7 +86,7 @@ function llamarMetodo(unqfyst,parametros){
 
     case "getAlbumByName":
       let artistaL2 = unqfyst.getAlbumByName(parametros[1]);
-      console.log("Nombre: "+ artistaL2.name +","+" Artista: "+ artistaL2.artista+","+" Año: "+ artistaL2.year);
+      console.log("Nombre: "+ artistaL2.name +","+" Artista: "+ artistaL2.artista.name+","+" Año: "+ artistaL2.year);
       break;
 
     case "getTrackByName":
