@@ -34,7 +34,7 @@ function llamarMetodo(unqfyst,parametros){
       let artista = unqfyst.getArtistByName(parametros[1])
       unqfyst.addAlbum(artista.name,{name:parametros[2], year:parseInt(parametros[3])});
       let album = unqfyst.getAlbumByName(parametros[2])
-      console.log(artista);
+      console.log(album);
       break;
 
     case "addTrack":
@@ -45,7 +45,9 @@ function llamarMetodo(unqfyst,parametros){
       break;
 
     case "getTracksMatchingGenres":
-      let tracks = unqfyst.getTracksMatchingGenres(parametros[1]);
+      let generos = parametros.slice(1);
+      console.log(generos)
+      let tracks = unqfyst.getTracksMatchingGenres(generos);
       //tracks.forEach(argument => console.log("Nombre: "+ argument.name +","+ " Albun: "+ argument.albun+","+ "  Duracion: "+ argument.duration+","+" Genero: "+ argument.genres ));
       //console.log(tracks);
       imprimirTracks(tracks)
@@ -58,7 +60,9 @@ function llamarMetodo(unqfyst,parametros){
       imprimirTracks(tracksAr)
       break;
     case "addPlaylist":
-      unqfyst.addPlaylist(parametros[1],parametros[2], parseInt(parametros[3])); 
+      let generos2 = parametros.slice(3);
+      console.log(generos2)
+      unqfyst.addPlaylist(parametros[1],generos2, parseInt(parametros[2])); 
       console.log(unqfyst.playlist);
       break;   
     
