@@ -79,7 +79,6 @@ class UNQfy {
   getTracksMatchingArtist(artistName) {
     let artista = this.getArtistByName(artistName);
     let res = [];
-    console.log(artista);
     for (var i = 0; i < artista.albumes.length; i++) {
       res = res.concat(artista.albumes[i].pistas);
     } 
@@ -107,9 +106,9 @@ class UNQfy {
     // El objeto album creado debe tener (al menos) las propiedades name (string) y year
     let artista = this.getArtistByName(artistName)
     if(artista === undefined){
-      console.log("El Album "+ "¨"+artistName +"¨"+ " No Existe")
+      console.log("El Artista "+ "¨"+artistName +"¨"+ " No Existe")
     }else{
-        let nuevoAlbun = new Album(artistName, params.name, params.year);
+        let nuevoAlbun = new Album(artista, params.name, params.year);
         artista.albumes.push(nuevoAlbun);
      }
   }
@@ -142,14 +141,35 @@ class UNQfy {
 
   getAlbumByName(name) {
     let album;
+    //let artista1 = this.artistas[0]
+    //console.log(artista.albumes)
+    //let album2 = artista1.albumes[0]
+    //let namealbum2 = album2.name
+    //console.log("NOMBREEE:" + name)
+    //console.log("ALBUM2"+album2)
+    //console.log("ALBUM2 Name:"+namealbum2)
     //let album = this.artistas.foreach(artista => artista.albumes.find(album => album.name === name));
     for (var i = 0; i < this.artistas.length; i++) {
-       album = this.artistas[i].albumes.find(album => album.name === name)
-      //Do something
+      let artista = this.artistas[i]
+      let albumes = artista.albumes
+      //console.log(artista.albumes)
+      //let album1 = artista.albumes[0]
+      //album = album1
+     // console.log("ALBUM1"+album1)
+     //console.log(album)
+     if(albumes.length !== 0){
+      album = albumes.find(album => album.name === name);
+      /*for (var n = 0; n < albumes.length; n++) {
+          let albumN = albumes[n]
+          if (albumN.name === name){
+            return albumN
+          }*/
+     }
+     //console.log("DALEEEE"+ album)
   }
-    return album;
+  return album;
   }
-
+  
   getTrackByName(name) {
     let pista;
     //let pista = this.tracks.find(pista => pista.name === name);
@@ -169,6 +189,11 @@ class UNQfy {
     return playlist
 
   }
+
+  allUndefined(array){
+    return array.every(a=> a=== undefined)
+  }
+
   //                Solo un genero
   addPlaylist(name, genresToInclude, maxDuration) {
     /* El objeto playlist creado debe soportar (al menos):
@@ -181,14 +206,15 @@ class UNQfy {
     */
     let nuevoPlayList = new Playlist(name)
     let trackGener = this.getTracksMatchingGenres(genresToInclude)
-    while(nuevoPlayList.duration()< maxDuration){
+    while(nuevoPlayList.duration()< maxDuration && trackGener.length != 0){
           let random = Math.floor((Math.random() * trackGener.length))
           //console.log("Random: "+ random)
           let track = trackGener[random]
+          trackGener.splice(random,1)
 
-          if(!nuevoPlayList.hasTrack(track)){
-            nuevoPlayList.addTrackToPlay(track)
-          } 
+          //if(!nuevoPlayList.hasTrack(track)){
+          nuevoPlayList.addTrackToPlay(track)
+         // } 
     } 
     
     // ASIGNACION DE TRACKS SIN RANDOMS 

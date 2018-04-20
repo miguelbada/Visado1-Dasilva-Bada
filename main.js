@@ -31,13 +31,17 @@ function llamarMetodo(unqfyst,parametros){
       break;
 
     case "addAlbum":
-      unqfyst.addAlbum(parametros[1],{name:parametros[2], year:parseInt(parametros[3])});
-      console.log(unqfyst.albumes);
+      let artista = unqfyst.getArtistByName(parametros[1])
+      unqfyst.addAlbum(artista.name,{name:parametros[2], year:parseInt(parametros[3])});
+      let album = unqfyst.getAlbumByName(parametros[2])
+      console.log(artista);
       break;
 
     case "addTrack":
-      unqfyst.addTrack(parametros[2],{name:parametros[1], duration:parseInt(parametros[3]), genres:[parametros[4]]});
-      console.log(unqfyst.tracks);
+      let albun = unqfyst.getAlbumByName(parametros[2])
+      console.log("NOMBRE ALBUM:"+parametros[2])
+      unqfyst.addTrack(parametros[2],{name:parametros[1], duration:parseInt(parametros[3]), genres:parametros[4]});
+      console.log(albun);
       break;
 
     case "getTracksMatchingGenres":
