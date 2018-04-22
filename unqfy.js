@@ -60,12 +60,11 @@ class UNQfy {
   }
   
   getAllTracks(){
+    let allAlbumes = this.getAllAlbunes();
     let res = [];
-    for (var i = 0; i < this.artistas.length; i++) {
-      for (var n = 0; n < this.artistas[i].albumes.length; n++) { 
-       res = res.concat(this.artistas[i].albumes[n].pistas);
-      }
-     }
+    for (var i = 0; i < allAlbumes.length; i++) { 
+      res = res.concat(allAlbumes[i].pistas);  
+    }
      return res;
   }
 
@@ -86,12 +85,16 @@ class UNQfy {
 
   getTracksMatchingArtist(artistName) {
     let artista = this.getArtistByName(artistName);
-    let res = [];
-    for (var i = 0; i < artista.albumes.length; i++) {
+    if(artista === undefined){
+      return artista;
+    }else{
+      let res = [];
+      for (var i = 0; i < artista.albumes.length; i++) {
       res = res.concat(artista.albumes[i].pistas);
-    } 
+      } 
     //let tracksAr = this.tracks.filter(tr => this.getAlbumByName(tr.albumName).artista === artistName)
     return res;
+     } 
   }
 
 
@@ -114,7 +117,7 @@ class UNQfy {
     // El objeto album creado debe tener (al menos) las propiedades name (string) y year
     let artista = this.getArtistByName(artistName)
     if(artista === undefined){
-      console.log("El Artista "+ "¨"+artistName +"¨"+ " No Existe")
+      this.artistaNoEncontrado(artistName);
     }else{
         let nuevoAlbun = new Album(artista, params.name, params.year);
         artista.albumes.push(nuevoAlbun);
@@ -130,7 +133,7 @@ class UNQfy {
   addTrack(albumName, params) {
     let album = this.getAlbumByName(albumName)
     if(album === undefined){
-      console.log("El Album "+ "¨"+albumName +"¨"+ " No Existe")
+      this.albumNoEncontrado(albumName);
     }else{
           let nuevoTrack = new Track(albumName, params.name, params.duration, params.genres)
           album.pistas.push(nuevoTrack)
@@ -142,9 +145,47 @@ class UNQfy {
     */
   }
 
+   //                Solo un genero
+   addPlaylist(name, genresToInclude, maxDuration) {
+    /* El objeto playlist creado debe soportar (al menos):
+      * una propiedad name (string)
+      * un metodo duration() que retorne la duración de la playlist.
+      * un metodo hasTrack(aTrack) que retorna true si aTrack se encuentra en la playlist
+    */
+
+    /* Precondicion: Tiene que haber los tracks necensarios para que se puede rellenar la playList   
+    */
+    let nuevoPlayList = new Playlist(name);
+    let trackGener = this.getTracksMatchingGenres(genresToInclude);
+    while(nuevoPlayList.duration()< maxDuration && trackGener.length != 0){
+          let random = Math.floor((Math.random() * trackGener.length));
+          //console.log("Random: "+ random)
+          let track = trackGener[random];
+          trackGener.splice(random,1);
+
+          //if(!nuevoPlayList.hasTrack(track)){
+          nuevoPlayList.addTrackToPlay(track);
+         // } 
+    } 
+    
+    // ASIGNACION DE TRACKS SIN RANDOMS 
+   /* let i;  
+    for (i = 0; i < this.tracks.length; i++) { 
+          if(this.tracks[i].genres.includes(genresToInclude)&& nuevoPlayList.duration()<= maxDuration){
+            nuevoPlayList.addTrackToPlay(this.tracks[i])
+          }
+    }*/
+    this.playlist.push(nuevoPlayList);
+  }
+
   getArtistByName(name) {
     let artista = this.artistas.find(artista => artista.name === name);
+
+    if(artista === undefined){
+      this.artistaNoEncontrado(name);
+    }else{
       return artista;
+    }  
   }
 
   getAlbumByName(name) {
@@ -152,6 +193,12 @@ class UNQfy {
     //console.log(albumes)
     let album;
     album = albumes.find(album => album.name === name);
+
+    if(album === undefined){
+      this.albumNoEncontrado(name);
+    }else{
+      return album;
+    }
     //let artista1 = this.artistas[0]
     //console.log(artista.albumes)
     //let album2 = artista1.albumes[0]
@@ -178,7 +225,6 @@ class UNQfy {
     // }
      //console.log("DALEEEE"+ album)
   //}
-  return album;
   }
   
   getTrackByName(name) {
@@ -194,50 +240,41 @@ class UNQfy {
     }*/
      //Do something
      //Do something
-    return pista;
+     if(pista === undefined){
+       this.trackNoEncontrado(name);
+     }else{
+      return pista;
+     }
   }
 
   getPlaylistByName(name) {
     let playlist = this.playlist.find(pl => pl.name === name)
-    return playlist
-
+   
+    if(playlist === undefined){
+      this.playlistNoEncontrado(name);
+    }else{
+      return playlist
+    }
   }
 
   allUndefined(array){
     return array.every(a=> a=== undefined)
   }
 
-  //                Solo un genero
-  addPlaylist(name, genresToInclude, maxDuration) {
-    /* El objeto playlist creado debe soportar (al menos):
-      * una propiedad name (string)
-      * un metodo duration() que retorne la duración de la playlist.
-      * un metodo hasTrack(aTrack) que retorna true si aTrack se encuentra en la playlist
-    */
+  artistaNoEncontrado(name){
+    return console.log("El Artista "+"¨"+name+"¨"+" No Existe!");
+  }
+  
+  albumNoEncontrado(name){
+    return console.log("El Album "+"¨"+name+"¨"+" No Existe!");
+  }
 
-    /* Precondicion: Tiene que haber los tracks necensarios para que se puede rellenar la playList   
-    */
-    let nuevoPlayList = new Playlist(name)
-    let trackGener = this.getTracksMatchingGenres(genresToInclude)
-    while(nuevoPlayList.duration()< maxDuration && trackGener.length != 0){
-          let random = Math.floor((Math.random() * trackGener.length))
-          //console.log("Random: "+ random)
-          let track = trackGener[random]
-          trackGener.splice(random,1)
+  trackNoEncontrado(name){
+    return console.log("El Track "+"¨"+name+"¨"+" No Existe!");
+  }
 
-          //if(!nuevoPlayList.hasTrack(track)){
-          nuevoPlayList.addTrackToPlay(track)
-         // } 
-    } 
-    
-    // ASIGNACION DE TRACKS SIN RANDOMS 
-   /* let i;  
-    for (i = 0; i < this.tracks.length; i++) { 
-          if(this.tracks[i].genres.includes(genresToInclude)&& nuevoPlayList.duration()<= maxDuration){
-            nuevoPlayList.addTrackToPlay(this.tracks[i])
-          }
-    }*/
-    this.playlist.push(nuevoPlayList)
+  playlistNoEncontrado(name){
+    return console.log("El Playlist "+"¨"+name+"¨"+" No Existe!");
   }
 
   save(filename = 'unqfy.json') {

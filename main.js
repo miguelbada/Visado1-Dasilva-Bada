@@ -22,26 +22,37 @@ function saveUNQfy(unqfy, filename) {
 function imprimirTracks(tracks){
   tracks.forEach(argument=> console.log("Nombre: " +argument.name+","+ " Albun: "+ argument.albumName+","+ "  Duracion: "+ argument.duration+","+" Genero: "+ argument.genres ));
 }
+
 function llamarMetodo(unqfyst,parametros){
   switch(parametros[0]){
     case "addArtist":
       unqfyst.addArtist({name:parametros[1],country:parametros[2]});
-      console.log(unqfyst.artistas);
-    //console.log(unqfyst.getArtistByName(parametros[1]));
+      //console.log(unqfyst.artistas);
+      console.log(unqfyst.getArtistByName(parametros[1]));
       break;
 
     case "addAlbum":
-      let artista = unqfyst.getArtistByName(parametros[1])
-      unqfyst.addAlbum(artista.name,{name:parametros[2], year:parseInt(parametros[3])});
-      let album = unqfyst.getAlbumByName(parametros[2])
-      console.log(album);
+      let artista = unqfyst.getArtistByName(parametros[1]);
+
+      if(artista === undefined){
+        return artista;
+      }else{
+        unqfyst.addAlbum(parametros[1], {name:parametros[2], year:parseInt(parametros[3])});
+        let album = unqfyst.getAlbumByName(parametros[2]);
+        console.log(album);
+      }
       break;
 
     case "addTrack":
-      let albun = unqfyst.getAlbumByName(parametros[2])
-      console.log("NOMBRE ALBUM:"+parametros[2])
+      let album = unqfyst.getAlbumByName(parametros[2])
+
+      if(album === undefined){
+        return album;
+      }else{
+        console.log("NOMBRE ALBUM:"+parametros[2]);
       unqfyst.addTrack(parametros[2],{name:parametros[1], duration:parseInt(parametros[3]), genres:parametros[4]});
-      console.log(albun);
+      console.log(album);
+      }
       break;
 
     case "getTracksMatchingGenres":
@@ -55,10 +66,15 @@ function llamarMetodo(unqfyst,parametros){
 
     case "getTracksMatchingArtist":
       let tracksAr = unqfyst.getTracksMatchingArtist(parametros[1]);
-      //tracksAr.forEach(argument => console.log("Nombre: "+ argument.name +","+ " Albun: "+ argument.albun+","+ "  Duracion: "+ argument.duration+","+" Genero: "+ argument.genres ));
+      if(tracksAr === undefined){
+        return tracksAr;
+      }else{
+        //tracksAr.forEach(argument => console.log("Nombre: "+ argument.name +","+ " Albun: "+ argument.albun+","+ "  Duracion: "+ argument.duration+","+" Genero: "+ argument.genres ));
       //console.log(tracksAr);
       imprimirTracks(tracksAr)
+      }
       break;
+
     case "addPlaylist":
       let generos2 = parametros.slice(3);
       console.log(generos2)
@@ -68,30 +84,49 @@ function llamarMetodo(unqfyst,parametros){
     
     case "getPlaylistByName":
       let playListT = unqfyst.getPlaylistByName(parametros[1]);
-      console.log("Playlist Nombre: "+ parametros[1] )
+
+      if(playListT === undefined){
+        return playListT;
+      }else{
+        console.log("Playlist Nombre: "+ parametros[1] )
       //playListT.pistas.forEach(argument=> console.log("Nombre: " +argument.name+","+ " Albun: "+ argument.albun+","+ "  Duracion: "+ argument.duration+","+" Genero: "+ argument.genres ));
-      imprimirTracks(playListT.pistas)
-     //console.log(playListT)
+        imprimirTracks(playListT.pistas)
+      //console.log(playListT)
+      }
      break;
      
     case "getArtistByName":
       let artistaL = unqfyst.getArtistByName(parametros[1]);
+
       if(artistaL === undefined){
-        console.log("El artista "+parametros[1]+","+" no se encuentra.");
+        return artistaL;
       }else{
         console.log("Nombre: "+ artistaL.name +","+" Pais: "+ artistaL.country);
       }
-      
       break;
 
     case "getAlbumByName":
       let artistaL2 = unqfyst.getAlbumByName(parametros[1]);
-      console.log("Nombre: "+ artistaL2.name +","+" Artista: "+ artistaL2.artista.name+","+" Año: "+ artistaL2.year);
+
+      if(artistaL2 === undefined){
+        return artistaL2;
+      }else{
+        console.log("Nombre: "+ artistaL2.name +","+" Artista: "+ artistaL2.artista.name+","+" Año: "+ artistaL2.year);
+      }
       break;
 
     case "getTrackByName":
       let trackGet = unqfyst.getTrackByName(parametros[1]);
-      console.log("Nombre: "+ trackGet.name +","+" Albun: "+ trackGet.albumName+","+" Duracion: "+ trackGet.duration+", "+"Gemero: "+ trackGet.genres);
+
+      if(trackGet === undefined){
+        return trackGet;
+      }else{
+        console.log("Nombre: "+ trackGet.name +","+" Album: "+ trackGet.albumName+","+" Duracion: "+ trackGet.duration+", "+"Genero: "+ trackGet.genres);
+      }
+      break;
+    
+    default:
+      console.log("¨"+parametros[0]+"¨"+" no es un comando valido!");
       break;
   }
 }
@@ -101,7 +136,7 @@ function main() {
   let parametros = process.argv.slice(2);
   console.log('arguments: ');
   parametros.forEach(argument => console.log(argument));
-  llamarMetodo(unqfy,parametros)
+  llamarMetodo(unqfy,parametros);
 
   saveUNQfy(unqfy, 'estado');
 }
