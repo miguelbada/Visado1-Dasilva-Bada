@@ -199,47 +199,12 @@ class UNQfy {
     }else{
       return album;
     }
-    //let artista1 = this.artistas[0]
-    //console.log(artista.albumes)
-    //let album2 = artista1.albumes[0]
-    //let namealbum2 = album2.name
-    //console.log("NOMBREEE:" + name)
-    //console.log("ALBUM2"+album2)
-    //console.log("ALBUM2 Name:"+namealbum2)
-    //let album = this.artistas.foreach(artista => artista.albumes.find(album => album.name === name));
-    //for (var i = 0; i < this.artistas.length; i++) {
-     // let artista = this.artistas[i]
-     // let albumes = artista.albumes
-      //console.log(artista.albumes)
-      //let album1 = artista.albumes[0]
-      //album = album1
-     // console.log("ALBUM1"+album1)
-     //console.log(album)
-     //if(albumes.length !== 0){
-      //album = albumes.find(album => album.name === name);
-      /*for (var n = 0; n < albumes.length; n++) {
-          let albumN = albumes[n]
-          if (albumN.name === name){
-            return albumN
-          }*/
-    // }
-     //console.log("DALEEEE"+ album)
-  //}
   }
   
   getTrackByName(name) {
     let pista;
     let tracks = this.getAllTracks();
     pista = tracks.find(pista => pista.name === name);
-    //let pista = this.tracks.find(pista => pista.name === name);
-    /*for (var i = 0; i < this.artistas.length; i++) {
-     for (var n = 0; n < this.artistas[i].albumes.length; n++) { 
-      pista = this.artistas[i].albumes[n].pistas.find(pista => pista.name === name);
-      
-     }
-    }*/
-     //Do something
-     //Do something
      if(pista === undefined){
        this.trackNoEncontrado(name);
      }else{
