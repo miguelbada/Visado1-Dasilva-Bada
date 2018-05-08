@@ -1,56 +1,17 @@
 
 const picklejs = require('picklejs');
 
-class Artista {
-  constructor(nombre, pais) {
-    this.name = nombre;
-    this.country = pais;
-    this.albumes = [];
-  }
-}
+let artista = require('./JavaScript/Artista');
+let Artista = artista.Artista;
 
-class Album {
-  constructor(_artista, nombre, _year) {
-    this.artista = _artista;
-    this.name = nombre;
-    this.year = _year;
-    this.pistas = [];
-   }
-}
+let album = require('./JavaScript/Album');
+let Album = album.Album;
 
-class Track {
-  constructor(nombreAlbum, nombre, duracion, genero) {
-    this.albumName = nombreAlbum;
-    this.name = nombre;
-    this.duration = duracion;
-    this.genres = genero
-  }
-  incluyeGenero(generos){
-    return generos.includes(this.genres);
-  }
-}
+let track = require('./JavaScript/Track');
+let Track = track.Track;
 
-class Playlist{
-  constructor(_name){
-    this.name = _name;
-    this.pistas = [];
-  }
-
-  duration(){
-    let res = 0;
-    this.pistas.forEach(tr=> res+= tr.duration);
-    return res;
-  }
-
-  hasTrack(aTrack){
-    let res = this.pistas.some(tr=> tr.name === aTrack.name);
-    return res;
-  }
-
-  addTrackToPlay(aTrack){
-    this.pistas.push(aTrack)
-  }
-}
+let playList = require('./JavaScript/Playlist');
+let Playlist = playList.Playlist;
 
 
 class UNQfy {
