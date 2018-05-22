@@ -183,6 +183,38 @@ class UNQfy {
     }
   }
 
+  populateAlbumsForArtist(artisname){
+    const fs = require('fs')
+    const filename = "./spotifyCreds.json"
+    const accet_token;
+
+    data = fs.readFileSync(filename) /*,(err,data)=>{
+      if(err){
+        console.log("ERROR")
+        process.exit(-1)
+      }
+      accet_token = JSON.parse(data).access_token
+    });*/
+
+    accet_token = JSON.parse(data).access_token
+
+    const rp = require('request-promise');
+    const options = {
+    url: 'https://api.spotify.com/v1/search',
+    qs:{
+      q: artisname,
+      type: "artist"
+    },
+    headers: { Authorization: 'Bearer ' + accet_token },
+    json: true,
+    };
+
+    rp.get(options, function(err,re,body){
+      let jsonArtist = JSON.parse(body) 
+      console.log(jsonArtist) 
+    });
+  }
+
   allUndefined(array){
     return array.every(a=> a=== undefined)
   }
@@ -202,6 +234,7 @@ class UNQfy {
   playlistNoEncontrado(name){
     return console.log("El Playlist "+"¨"+name+"¨"+" No Existe!");
   }
+  
 
   save(filename = 'unqfy.json') {
     new picklejs.FileSerializer().serialize(filename, this);
