@@ -210,8 +210,25 @@ class UNQfy {
     };
 
     rp.get(options, function(err,re,body){
-      let jsonArtist = JSON.parse(body) 
-      console.log(jsonArtist) 
+      if(err){console.log("Error" + err.message)
+        process.exit(-1)}
+    let jsonArtist = JSON.parse(body) 
+    console.log(jsonArtist) 
+    let artist = jsonArtist[0]
+    const options2 ={
+      url: "https://api.spotify.com/v1/artists/"+artist.id+"/albums",
+      headers: { Authorization: 'Bearer ' + accet_token },
+      json: true,
+    };  
+
+    rp.get(options2, function(error,re,data){
+      if(error){console.log("Error" + error.message)
+        process.exit(-1)}
+      let albunes =  JSON.parse(data)
+      let artista  = this.getArtistByName(artisname)
+      artista.albumes = artista.albumes.concat(albunes)
+
+    });
     });
   }
 

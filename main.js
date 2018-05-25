@@ -114,7 +114,11 @@ function llamarMetodo(unqfyst,parametros){
         console.log("Nombre: "+ artistaL2.name +","+" Artista: "+ artistaL2.artista.name+","+" Año: "+ artistaL2.year);
       }
       break;
-
+    case "populateAlbumsForArtist":
+      let artistname = parametros[1]
+      unqfyst.populateAlbumsForArtist(artistname)
+      break;
+         
     case "getTrackByName":
       let trackGet = unqfyst.getTrackByName(parametros[1]);
 
