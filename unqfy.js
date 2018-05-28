@@ -18,6 +18,9 @@ class UNQfy {
   constructor(){
     this.artistas = [];
     this.playlist = [];
+    this.contadorIdArtist= 1;
+    this.contadorIdTrack= 1;
+    this.contadorIdAlbum= 1;
   }
   
   getAllTracks(){
@@ -35,6 +38,33 @@ class UNQfy {
        res = res.concat(this.artistas[i].albumes);
      }
      return res;
+  }
+
+  deleteArtistById(id){
+    let rest = this.artistas.filter((artista)=> artista.artistId != id)
+    this.artistas = rest;
+  }
+  artistaRepetido(nameArtis){
+    // Verifica si hay ya un artista con ese mismo nombre 
+    let boolean = false;
+    boolean = this.artistas.some((art)=>art.name === nameArtis)
+    return boolean
+
+  }
+  searchByName(name){
+    // Filtra aquellos artistas cuyo nombre tengan incluido name en su string
+    if(this.artistas != []){ 
+    let res = this.artistas.filter((artista)=> this.containsName(artista.name, name))
+    let resJSON = res.map((artista)=> artista.toJSON())
+    return resJSON
+    }
+    return []
+  }
+
+  containsName(nameArtist, stringContains){
+    // Verifica si StringContains se encuentra incluida en  nameArtist
+    let stringContainsLower = stringContains.toLowerCase();
+    return nameArtist.toLowerCase().indexOf(stringContainsLower) != -1
   }
 
   getTracksMatchingGenres(genres) {
@@ -66,7 +96,10 @@ class UNQfy {
   addArtist(params) {
   // El objeto artista creado debe soportar (al menos) las propiedades name (string) y country (string)
     let nuevoArtista = new Artista(params.name, params.country);
+    nuevoArtista.artistId = this.contadorIdArtist
+    this.contadorIdArtist+=1
     this.artistas.push(nuevoArtista);
+    return nuevoArtista
   }
 
 
@@ -149,6 +182,11 @@ class UNQfy {
     }  
   }
 
+  getArtistById(id){
+      let artista = this.artistas.find(artista => artista.artistId === id);
+      return artista; 
+  }
+
   getAlbumByName(name) {
     let albumes = this.getAllAlbunes()
     //console.log(albumes)
@@ -184,19 +222,13 @@ class UNQfy {
   }
 
   populateAlbumsForArtist(artisname){
-    const fs = require('fs')
-    const filename = "./spotifyCreds.json"
-    const accet_token;
+    const fs = require('fs');
+    const filename = "./spotifyCreds.json";
+    //const accet_token;
 
-    data = fs.readFileSync(filename) /*,(err,data)=>{
-      if(err){
-        console.log("ERROR")
-        process.exit(-1)
-      }
-      accet_token = JSON.parse(data).access_token
-    });*/
+    let data = fs.readFileSync(filename) 
 
-    accet_token = JSON.parse(data).access_token
+    const accet_token = JSON.parse(data).access_token
 
     const rp = require('request-promise');
     const options = {
@@ -210,12 +242,13 @@ class UNQfy {
     };
 
     rp.get(options, function(err,re,body){
-      if(err){console.log("Error" + err.message)
-        process.exit(-1)}
-    let jsonArtist = JSON.parse(body) 
-    console.log(jsonArtist) 
-    let artist = jsonArtist[0]
-    const options2 ={
+      if(err){console.log("Error" + err.message);
+        process.exit(-1)};
+      console.log(body)    //El acces token expiro
+      let jsonArtist = JSON.parse(body) 
+      console.log(jsonArtist) 
+      let artist = jsonArtist[0]
+      const options2 ={
       url: "https://api.spotify.com/v1/artists/"+artist.id+"/albums",
       headers: { Authorization: 'Bearer ' + accet_token },
       json: true,
@@ -224,6 +257,7 @@ class UNQfy {
     rp.get(options2, function(error,re,data){
       if(error){console.log("Error" + error.message)
         process.exit(-1)}
+      console.log(data)  
       let albunes =  JSON.parse(data)
       let artista  = this.getArtistByName(artisname)
       artista.albumes = artista.albumes.concat(albunes)

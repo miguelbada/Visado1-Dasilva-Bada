@@ -118,6 +118,11 @@ function llamarMetodo(unqfyst,parametros){
       let artistname = parametros[1]
       unqfyst.populateAlbumsForArtist(artistname)
       break;
+    case "gatLyrics":
+      let nombreTrack = parametros[1]
+      let l = unqfyst.getTrackByName(nombreTrack).getLyrics();
+      console.log(l)
+      break;  
          
     case "getTrackByName":
       let trackGet = unqfyst.getTrackByName(parametros[1]);
