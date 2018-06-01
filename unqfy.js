@@ -1,5 +1,7 @@
 
+const fs = require('fs');
 const picklejs = require('picklejs');
+const rp = require('request-promise');
 
 let artista = require('./JavaScript/Artista');
 let Artista = artista.Artista;
@@ -222,68 +224,61 @@ class UNQfy {
   }
 
   populateAlbumsForArtist(artisname) {
-    const fs = require('fs');
-    const filename = "./spotifyCreds.json";
-    //const accet_token;
-
-    let data = fs.readFileSync(filename)
-
-    const accet_token = JSON.parse(data).access_token
-
-    const rp = require('request-promise');
     const options = {
       url: 'https://api.spotify.com/v1/search',
       qs: {
         q: artisname,
-        type: "artist"
+        type: "artist",
+        limit: 1
       },
-      headers: { Authorization: 'Bearer ' + accet_token },
+      headers: { Authorization: 'Bearer ' + this.accessToken() },
       json: true,
     };
 
-    return rp.get(options).then((body) => {
-      // if(err){console.log("Error" + err.message);
-      // process.exit(-1)};
-      console.log(body)    //El acces token expiro
-      let jsonArtist = body.artists.items;
-      console.log(jsonArtist);
-      let artist = jsonArtist[0];
-
-      const options2 = {
-        url: "https://api.spotify.com/v1/artists/" + artist.id + "/albums",
-        headers: { Authorization: 'Bearer ' + accet_token },
-        json: true,
-      };
-
-       rp.get(options2).then((data) => {
-        // if(error){console.log("Error" + error.message)
-        // process.exit(-1)}
-        console.log(data.items);
-        let albunes = data.items;
-        let artista = this.getArtistByName(artisname);
-        let listaAlbum = albunes.map((album) => {
-          let alb = new Album(artista, album.name, parseInt(album.release_date))
-          alb.albumID = this.contadorIdAlbum;
-          this.contadorIdAlbum += 1;
-          
-        });
-
-
-        artista.albumes = artista.albumes.concat(listaAlbum);
-        console.log(artista);
-
+    let albumes = rp.get(options)
+      .then((artistas) => {
+        console.log(artistas);    //El acces token expiro
+        return artistas.artists.items[0];
+        console.log(artist);
       })
-    }).catch((error) => {
-      if (error) {
-        console.log("Error" + error.message)
-        process.exit(-1)
-      }
-    });
+      .then((artista) => {
+        const options2 = {
+          url: "https://api.spotify.com/v1/artists/" + artista.id + "/albums",
+          headers: { Authorization: 'Bearer ' + this.accessToken() },
+          json: true,
+        }
+
+        return rp.get(options2)
+      })
+      .then((albums) => {
+        console.log("La cantidad de albumes es: " + albums.items.length);
+        let albumes = albums.items;
+        let artista = this.getArtistByName(artisname);
+        let listaAlbum = albumes.map((album) => {
+        this.mkReduceAlbum(artista, album);
+        });
+        console.log(listaAlbum);
+        artista.albumes = artista.albumes.concat(listaAlbum);
+        
+        console.log("luego de la concatenacion el largo es: " + artista.albumes);
+      })
+      .then(() => {
+        let filename = 'unqfy.json';
+        this.save(filename);
+      })
+      .catch((error) => {
+        if (error) {
+          console.log("Error" + error.message)
+          process.exit(-1)
+        }
+      });
+
+    return albumes;
   }
 
-  allUndefined(array) {
-    return array.every(a => a === undefined)
-  }
+  //allUndefined(array) {
+  //  return array.every(a => a === undefined)
+  //}
 
   artistaNoEncontrado(name) {
     return console.log("El Artista " + "¨" + name + "¨" + " No Existe!");
@@ -301,6 +296,22 @@ class UNQfy {
     return console.log("El Playlist " + "¨" + name + "¨" + " No Existe!");
   }
 
+  accessToken() {
+    const filename = "./spotifyCreds.json";
+    //const accet_token;
+    let data = fs.readFileSync(filename);
+    const accessToken = JSON.parse(data).access_token;
+
+    return accessToken;
+  }
+
+  mkReduceAlbum(artista, fullAlbum){
+    let album = new Album(artista, fullAlbum.name, parseInt(fullAlbum.release_date))
+    album.albumID = this.contadorIdAlbum;
+    this.contadorIdAlbum += 1;
+
+    return album;
+  }
 
   save(filename = 'unqfy.json') {
     new picklejs.FileSerializer().serialize(filename, this);

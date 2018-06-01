@@ -118,8 +118,10 @@ function llamarMetodo(unqfyst, parametros) {
       break;
     case "populateAlbumsForArtist":
       let artistname = parametros[1]
-      unqfyst.populateAlbumsForArtist(artistname).then(() => {console.log(unqfyst.artistas);
-        saveUNQfy(unqfyst, 'estado')});
+      unqfyst.populateAlbumsForArtist(artistname).then(() => {
+        // console.log(unqfyst.artistas);
+        saveUNQfy(unqfyst, 'estado')
+      });
       console.log(unqfyst.artistas);
       asincronico = true;
       //saveUNQfy(unqfyst, 'estado');
@@ -140,6 +142,11 @@ function llamarMetodo(unqfyst, parametros) {
       } else {
         console.log("Nombre: " + trackGet.name + "," + " Album: " + trackGet.albumName + "," + " Duracion: " + trackGet.duration + ", " + "Genero: " + trackGet.genres);
       }
+      break;
+      
+    case "getTotalAlbumes":
+      let albumesGet = unqfyst.getAllAlbunes();
+      console.log("Total de albumes: " + albumesGet.length);
       break;
 
     default:
