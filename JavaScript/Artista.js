@@ -19,6 +19,14 @@ class Artista {
     }
     return res
   }
+
+  deleteAlbum(idAlbum){
+    let res = this.albumes.filter(album => album.albumID != idAlbum);
+    console.log(idAlbum)
+    console.log(res)
+    this.albumes = res;
+  }
+
 }
 
 

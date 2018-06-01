@@ -20,9 +20,9 @@ class UNQfy {
   constructor() {
     this.artistas = [];
     this.playlist = [];
-    this.contadorIdArtist = 1;
-    this.contadorIdTrack = 1;
-    this.contadorIdAlbum = 1;
+    this.contadorId = 1;
+    //this.contadorIdTrack = 1;
+    //this.contadorIdAlbum = 1;
   }
 
   getAllTracks() {
@@ -46,12 +46,36 @@ class UNQfy {
     let rest = this.artistas.filter((artista) => artista.artistId != id)
     this.artistas = rest;
   }
+
+  deleteAlbumById(id){
+    let album = this.getAlbumById(id);
+    console.log(album);
+    let artista = album.artista
+    artista.deleteAlbum(album.albumID);
+  }
+
+  albumRepetido(nameAlbum){
+    let boolean = false;
+    boolean = this.getAllAlbunes().some((alb)=> alb.name === nameAlbum);
+    return boolean;
+  };
+
   artistaRepetido(nameArtis) {
     // Verifica si hay ya un artista con ese mismo nombre 
     let boolean = false;
     boolean = this.artistas.some((art) => art.name === nameArtis)
     return boolean
 
+  }
+  searchAlbumByName(name){
+    let allAlbums = this.getAllAlbunes();
+    if(allAlbums != []){
+      let res = allAlbums.filter((album)=> this.containsName(album.name,name));
+      let resJSON = res.map((album)=> album.toJSON());
+      return resJSON;
+    }
+
+    return []
   }
   searchByName(name) {
     // Filtra aquellos artistas cuyo nombre tengan incluido name en su string
@@ -98,8 +122,8 @@ class UNQfy {
   addArtist(params) {
     // El objeto artista creado debe soportar (al menos) las propiedades name (string) y country (string)
     let nuevoArtista = new Artista(params.name, params.country);
-    nuevoArtista.artistId = this.contadorIdArtist;
-    this.contadorIdArtist += 1;
+    nuevoArtista.artistId = this.contadorId;
+    this.contadorId += 1;
     this.artistas.push(nuevoArtista);
     return nuevoArtista;
   }
@@ -116,7 +140,10 @@ class UNQfy {
       this.artistaNoEncontrado(artistName);
     } else {
       let nuevoAlbun = new Album(artista, params.name, params.year);
+      nuevoAlbun.albumID = this.contadorId
+      this.contadorId+=1
       artista.albumes.push(nuevoAlbun);
+      return nuevoAlbun
     }
   }
 
@@ -187,6 +214,12 @@ class UNQfy {
   getArtistById(id) {
     let artista = this.artistas.find(artista => artista.artistId === id);
     return artista;
+  }
+
+  getAlbumById(id){
+    let albumes = this.getAllAlbunes();
+    let album = albumes.find(album => album.albumID === id);
+    return album;
   }
 
   getAlbumByName(name) {
