@@ -128,7 +128,7 @@ function llamarMetodo(unqfyst, parametros) {
       break;
     case "getLyrics":
       let nombreTrack = parametros[1]
-      let l = unqfyst.getTrackByName(nombreTrack).getLyrics();
+      let l = unqfyst.getLyrics(nombreTrack);
       console.log(l);
       asincronico = true;
       saveUNQfy(unqfyst, 'estado');

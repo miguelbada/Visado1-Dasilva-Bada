@@ -13,9 +13,10 @@ let Playlist = playList.Playlist;
 let errors = require('./Errors');
 let ApiError = errors.APIError
 let AlreadyExistsError = errors.AlreadyExistsError;
-let InvalidInputError = errors.InvalidInputError
-let InvalidURL = errors.InvalidURL
-let ArtistNotFound = errors.ArtistNotFound
+let InvalidInputError = errors.InvalidInputError;
+let InvalidURL = errors.InvalidURL;
+let ArtistNotFound = errors.ArtistNotFound;
+let NotFound = errors.NotFound;
 
 const fs = require('fs');
 let unqmod = require('./unqfy');
@@ -76,16 +77,20 @@ function errorHandler(err, req, res, next) {
         }  
 
 app.use('/api', router);
+app.use((req,res,next)=>{
+    throw new NotFound();
+});
+
 router.get('/artists/:id',function (req, res) { 
     //  console.log(req);
       let ids =  parseInt(req.params.id) 
       console.log(ids);
       let artista = unquiFy.getArtistById(ids)
       if(artista === undefined){
-        throw new ArtistNotFound();
+        throw new NotFound();
         process.exit(-1);
       }
-      let JsonArtist = artista.toJSON()
+      let JsonArtist = artista.toJSON();
       res.json(JsonArtist);
     })
 router.delete('/artists/:id',function (req, res) { 
@@ -94,7 +99,7 @@ router.delete('/artists/:id',function (req, res) {
       console.log(ids);
       let artista = unquiFy.getArtistById(ids)  
       if(artista === undefined){
-        throw new ArtistNotFound();
+        throw new NotFound();
         process.exit(-1);
       }
       unquiFy.deleteArtistById(ids)
@@ -121,23 +126,20 @@ router.route('/artists')
     // create a track (accessed at POST http://localhost:8080/api/artists)
     .post(function (req, res,next) {
         let artBody = req.body
+        if(!(artBody.name && artBody.country)){
+            throw new InvalidInputError();
+            process.exit(-1);
+        }
         if(unquiFy.artistaRepetido(artBody.name)){
-            /*let error = new AlreadyExistsError()
-            res.json({ status: error.status,
-                errorCode: error.errorCode
-             })*/
-             throw new AlreadyExistsError()
-            //next(new AlreadyExistsError())
+             throw new AlreadyExistsError();
         }else{ 
 
             let art = new Artista(artBody.name, artBody.country)
             let artistId= unquiFy.addArtist(art)
             console.log(req.body.name);
             saveUNQfy(unquiFy, 'estado');
-            res.json({ "id": artistId.artistId,
-            "name": artistId.name,
-            "albums": artistId.albumes,
-            "country": artistId.country,});
+            let artistJSON = artistId.toJSON();
+            res.json(artistJSON);
         }
     })
 
@@ -145,7 +147,7 @@ router.delete('/albums/:id',function (req, res){
     let ids = parseInt(req.params.id)
     let album = unquiFy.getAlbumById(ids);
     if(album === undefined){
-        throw new ArtistNotFound();
+        throw new NotFound();
         process.exit(-1);
       }
     unquiFy.deleteAlbumById(ids)
@@ -157,7 +159,7 @@ router.get('/albums/:id',function (req, res){
     console.log(ids);
     let album = unquiFy.getAlbumById(ids);
     if(album === undefined){
-        throw new ArtistNotFound();
+        throw new NotFound();
         process.exit(-1);
       }
       let JsonAlbum = album.toJSON()
@@ -177,6 +179,10 @@ router.route('/albums')
     })
     .post(function (req, res,next){
         let albumBody = req.body;
+        if(!(albumBody.artistId && albumBody.name && albumBody.year)){
+            throw new InvalidInputError();
+            process.exit(-1);
+        }
         let artista = unquiFy.getArtistById(albumBody.artistId);
         if(artista === undefined ){
             throw new ArtistNotFound()
@@ -196,10 +202,8 @@ router.route('/albums')
         let albumId = unquiFy.addAlbum(artista.name,albumBody);
         console.log(albumId);
         saveUNQfy(unquiFy, 'estado');
-        res.json({ "id": albumId.albumID,
-            "name": albumId.name,
-            "year": albumId.year,
-            "tracks": albumId.pistas});
+        let albumJSON = albumId.toJSON();
+        res.json(albumJSON);
 
     });    
     

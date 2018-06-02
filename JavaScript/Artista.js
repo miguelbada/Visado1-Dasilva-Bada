@@ -15,7 +15,7 @@ class Artista {
       id: this.artistId,
       name: this.name,
       albums: albunesJSON,
-      country: this.country
+      country: this.country,
     }
     return res
   }

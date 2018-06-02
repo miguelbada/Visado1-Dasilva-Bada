@@ -255,7 +255,54 @@ class UNQfy {
       return playlist
     }
   }
-
+  getLyrics(nombreTrack){
+    let track = this.getTrackByName(nombreTrack)
+    if(track.lyrics === null){
+      const rp = require('request-promise');
+      const option ={
+        url: 'http://api.musixmatch.com/ws/1.1/track.search',
+        qs:{
+          q_track: track.name,
+          apikey:'44e25018083ffd40c281dad1e7c2128d'
+        },
+        json: true,
+      }
+      rp.get(option)
+        .then((body)=>{
+        console.log(body);
+        let tracks = body.message.body.track_list;
+        let track = tracks[0].track;
+        console.log(track);
+        return track;})
+        .then((pista)=>{ 
+        const option2 ={
+          url: 'https://developer.musixmatch.com/documentation/api-reference/track-lyrics-get',
+          qs:{
+            track_id: pista.track_id,
+            apikey:'44e25018083ffd40c281dad1e7c2128d'
+           },
+          json: true,
+        };
+        return rp.get(option2);})
+        .then((data)=>{ 
+          console.log(data)
+           // console.log("ERROR"+ error.message)
+           // process.exit(-1)
+          let trackLytics = data.lyrics_body
+          track.lyrics = trackLytics
+          this.save(this, 'estado');
+          return track.lyrics;
+           })
+          .catch((error) => {
+            if (error) {
+              console.log("Error" + error.message)
+              process.exit(-1)
+            }
+          }); 
+    }else{
+          return track.lyrics;
+        }
+  };
   populateAlbumsForArtist(artisname) {
     const options = {
       url: 'https://api.spotify.com/v1/search',
@@ -340,8 +387,8 @@ class UNQfy {
 
   mkReduceAlbum(artista, fullAlbum){
     let album = new Album(artista, fullAlbum.name, parseInt(fullAlbum.release_date))
-    album.albumID = this.contadorIdAlbum;
-    this.contadorIdAlbum += 1;
+    album.albumID = this.contadorId;
+    this.contadorId += 1;
 
     return album;
   }
