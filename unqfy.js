@@ -20,9 +20,9 @@ class UNQfy {
   constructor() {
     this.artistas = [];
     this.playlist = [];
-    this.contadorIdArtist = 1;
-    this.contadorIdTrack = 1;
-    this.contadorIdAlbum = 1;
+    this.contadorId = 1;
+    //this.contadorIdTrack = 1;
+    //this.contadorIdAlbum = 1;
   }
 
   getAllTracks() {
@@ -46,12 +46,36 @@ class UNQfy {
     let rest = this.artistas.filter((artista) => artista.artistId != id)
     this.artistas = rest;
   }
+
+  deleteAlbumById(id){
+    let album = this.getAlbumById(id);
+    console.log(album);
+    let artista = album.artista
+    artista.deleteAlbum(album.albumID);
+  }
+
+  albumRepetido(nameAlbum){
+    let boolean = false;
+    boolean = this.getAllAlbunes().some((alb)=> alb.name === nameAlbum);
+    return boolean;
+  };
+
   artistaRepetido(nameArtis) {
     // Verifica si hay ya un artista con ese mismo nombre 
     let boolean = false;
     boolean = this.artistas.some((art) => art.name === nameArtis)
     return boolean
 
+  }
+  searchAlbumByName(name){
+    let allAlbums = this.getAllAlbunes();
+    if(allAlbums != []){
+      let res = allAlbums.filter((album)=> this.containsName(album.name,name));
+      let resJSON = res.map((album)=> album.toJSON());
+      return resJSON;
+    }
+
+    return []
   }
   searchByName(name) {
     // Filtra aquellos artistas cuyo nombre tengan incluido name en su string
@@ -98,8 +122,8 @@ class UNQfy {
   addArtist(params) {
     // El objeto artista creado debe soportar (al menos) las propiedades name (string) y country (string)
     let nuevoArtista = new Artista(params.name, params.country);
-    nuevoArtista.artistId = this.contadorIdArtist;
-    this.contadorIdArtist += 1;
+    nuevoArtista.artistId = this.contadorId;
+    this.contadorId += 1;
     this.artistas.push(nuevoArtista);
     return nuevoArtista;
   }
@@ -116,7 +140,10 @@ class UNQfy {
       this.artistaNoEncontrado(artistName);
     } else {
       let nuevoAlbun = new Album(artista, params.name, params.year);
+      nuevoAlbun.albumID = this.contadorId
+      this.contadorId+=1
       artista.albumes.push(nuevoAlbun);
+      return nuevoAlbun
     }
   }
 
@@ -189,6 +216,12 @@ class UNQfy {
     return artista;
   }
 
+  getAlbumById(id){
+    let albumes = this.getAllAlbunes();
+    let album = albumes.find(album => album.albumID === id);
+    return album;
+  }
+
   getAlbumByName(name) {
     let albumes = this.getAllAlbunes()
     console.log(albumes)
@@ -222,7 +255,54 @@ class UNQfy {
       return playlist
     }
   }
-
+  getLyrics(nombreTrack){
+    let track = this.getTrackByName(nombreTrack)
+    if(track.lyrics === null){
+      const rp = require('request-promise');
+      const option ={
+        url: 'http://api.musixmatch.com/ws/1.1/track.search',
+        qs:{
+          q_track: track.name,
+          apikey:'44e25018083ffd40c281dad1e7c2128d'
+        },
+        json: true,
+      }
+      rp.get(option)
+        .then((body)=>{
+        console.log(body);
+        let tracks = body.message.body.track_list;
+        let track = tracks[0].track;
+        console.log(track);
+        return track;})
+        .then((pista)=>{ 
+        const option2 ={
+          url: 'https://developer.musixmatch.com/documentation/api-reference/track-lyrics-get',
+          qs:{
+            track_id: pista.track_id,
+            apikey:'44e25018083ffd40c281dad1e7c2128d'
+           },
+          json: true,
+        };
+        return rp.get(option2);})
+        .then((data)=>{ 
+          console.log(data)
+           // console.log("ERROR"+ error.message)
+           // process.exit(-1)
+          let trackLytics = data.lyrics_body
+          track.lyrics = trackLytics
+          this.save(this, 'estado');
+          return track.lyrics;
+           })
+          .catch((error) => {
+            if (error) {
+              console.log("Error" + error.message)
+              process.exit(-1)
+            }
+          }); 
+    }else{
+          return track.lyrics;
+        }
+  };
   populateAlbumsForArtist(artisname) {
     const options = {
       url: 'https://api.spotify.com/v1/search',
@@ -307,8 +387,8 @@ class UNQfy {
 
   mkReduceAlbum(artista, fullAlbum){
     let album = new Album(artista, fullAlbum.name, parseInt(fullAlbum.release_date))
-    album.albumID = this.contadorIdAlbum;
-    this.contadorIdAlbum += 1;
+    album.albumID = this.contadorId;
+    this.contadorId += 1;
 
     return album;
   }

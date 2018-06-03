@@ -12,6 +12,20 @@ class InvalidInputError extends APIError {
     } 
 }
 
+class NotFound extends APIError{
+    constructor() {  
+        super('NotFound', 404, 'RESOURCE_NOT_FOUND'); 
+   } 
+}
+
+
+class ArtistNotFound extends APIError{
+    constructor() {  
+        super('ArtistNotFound', 404, 'RELATED_RESOURCE_NOT_FOUND'); 
+   } 
+}
+
+
 class AlreadyExistsError extends APIError { 
     constructor() {  
          super('AlreadyExistsError', 409, 'RESOURCE_ALREADY_EXISTS'); 
@@ -29,5 +43,7 @@ module.exports = {
     APIError: APIError,
     InvalidInputError: InvalidInputError,
     AlreadyExistsError: AlreadyExistsError,
-    InvalidURL:InvalidURL
+    InvalidURL:InvalidURL,
+    NotFound:NotFound,
+    ArtistNotFound:ArtistNotFound
   }

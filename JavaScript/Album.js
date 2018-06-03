@@ -12,7 +12,7 @@ class Album {
           id: this.albumID,
           name: this.name,
           year: this.year,
-          tracks: this.pistas 
+          tracks: this.pistas,
       }
       return res
   }

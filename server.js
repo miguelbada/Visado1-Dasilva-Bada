@@ -11,9 +11,12 @@ let playList = require('./JavaScript/Playlist');
 let Playlist = playList.Playlist;
 
 let errors = require('./Errors');
+let ApiError = errors.APIError
 let AlreadyExistsError = errors.AlreadyExistsError;
-let InvalidInputError = errors.InvalidInputError
-let InvalidURL = errors.InvalidURL
+let InvalidInputError = errors.InvalidInputError;
+let InvalidURL = errors.InvalidURL;
+let ArtistNotFound = errors.ArtistNotFound;
+let NotFound = errors.NotFound;
 
 const fs = require('fs');
 let unqmod = require('./unqfy');
@@ -58,41 +61,51 @@ app.use(bodyParser.json());
 function errorHandler(err, req, res, next) {
     console.error(err); // imprimimos el error en consola 
     // Chequeamos que tipo de error es y actuamos en consecuencia
-    if (err instanceof InvalidURL) {
-        res.status(err.status);
-        res.json({ status: err.status, errorCode: err.errorCode });
-    }
-    else if (err instanceof InvalidInputError) {
-        res.status(err.status);
-        res.json({ status: err.status, errorCode: err.errorCode });
-    } else if (err.type === 'entity.parse.failed') {
+    if(err instanceof ApiError  ){
+        res.status(err.status); 
+        res.json({status: err.status, errorCode: err.errorCode});
+    } else if (err.type === 'entity.parse.failed'){
         // body-parser error para JSON invalido   
         res.status(err.status);
-        res.json({ status: err.status, errorCode: 'BAD_REQUEST' });
-    }
-    else {
-        // continua con el manejador de errores por defecto   
-        next(err);
-    }
-}
+        res.json({status: err.status, errorCode: 'BAD_REQUEST'}); }
+         else {
+             // continua con el manejador de errores por defecto
+             res.status(err.status)
+             res.json({status: 500, errorCode: 'INTERNAL_SERVER_ERROR'})   
+             next(err); 
+            } 
+        }  
 
 app.use('/api', router);
-router.get('/artists/:id', function (req, res) {
+app.use((req,res,next)=>{
+    throw new NotFound();
+});
+
+router.get('/artists/:id',function (req, res) { 
     //  console.log(req);
-    let ids = parseInt(req.params.id);
-    console.log(ids);
-    let artista = unquiFy.getArtistById(ids);
-    let JsonArtist = artista.toJSON();
-    res.json(JsonArtist);
-})
-router.delete('/artists/:id', function (req, res) {
+      let ids =  parseInt(req.params.id) 
+      console.log(ids);
+      let artista = unquiFy.getArtistById(ids)
+      if(artista === undefined){
+        throw new NotFound();
+        process.exit(-1);
+      }
+      let JsonArtist = artista.toJSON();
+      res.json(JsonArtist);
+    })
+router.delete('/artists/:id',function (req, res) { 
     //  console.log(req);
-    let ids = parseInt(req.params.id);
-    console.log(ids);
-    unquiFy.deleteArtistById(ids);
-    saveUNQfy(unquiFy, 'estado');
-    res.json();
-})
+      let ids =  parseInt(req.params.id) 
+      console.log(ids);
+      let artista = unquiFy.getArtistById(ids)  
+      if(artista === undefined){
+        throw new NotFound();
+        process.exit(-1);
+      }
+      unquiFy.deleteArtistById(ids)
+      saveUNQfy(unquiFy, 'estado');
+      res.json();
+    })    
 
 router.route('/artists')
     .get(function (req, res) {
@@ -113,28 +126,87 @@ router.route('/artists')
     // create a track (accessed at POST http://localhost:8080/api/artists)
     .post(function (req, res, next) {
         let artBody = req.body
-        if (unquiFy.artistaRepetido(artBody.name)) {
-            let error = new AlreadyExistsError()
-            res.json({
-                status: error.status,
-                errorCode: error.errorCode
-            })
-            //next(new AlreadyExistsError())
-        } else {
+        if(!(artBody.name && artBody.country)){
+            throw new InvalidInputError();
+            process.exit(-1);
+        }
+        if(unquiFy.artistaRepetido(artBody.name)){
+             throw new AlreadyExistsError();
+        }else{ 
 
             let art = new Artista(artBody.name, artBody.country)
             let artistId = unquiFy.addArtist(art)
             console.log(req.body.name);
             saveUNQfy(unquiFy, 'estado');
-            res.json({
-                "id": artistId.artistId,
-                "name": artistId.name,
-                "albums": artistId.albumes,
-                "country": artistId.country,
-            });
+            let artistJSON = artistId.toJSON();
+            res.json(artistJSON);
         }
     })
 
+router.delete('/albums/:id',function (req, res){
+    let ids = parseInt(req.params.id)
+    let album = unquiFy.getAlbumById(ids);
+    if(album === undefined){
+        throw new NotFound();
+        process.exit(-1);
+      }
+    unquiFy.deleteAlbumById(ids)
+    saveUNQfy(unquiFy, 'estado');
+    res.json();  
+});    
+router.get('/albums/:id',function (req, res){
+    let ids =  parseInt(req.params.id) 
+    console.log(ids);
+    let album = unquiFy.getAlbumById(ids);
+    if(album === undefined){
+        throw new NotFound();
+        process.exit(-1);
+      }
+      let JsonAlbum = album.toJSON()
+      res.json(JsonAlbum);
+});    
+router.route('/albums')
+    .get(function (req, res){
+        console.log(req.query);
+        if (req.query.name){
+            let searchAlbu = unquiFy.searchAlbumByName(req.query.name);
+            res.json(searchAlbu);
+        }
+        else{
+             let resAl = unquiFy.getAllAlbunes().map((album)=> album.toJSON());
+             res.json(resAl)
+        }
+    })
+    .post(function (req, res,next){
+        let albumBody = req.body;
+        if(!(albumBody.artistId && albumBody.name && albumBody.year)){
+            throw new InvalidInputError();
+            process.exit(-1);
+        }
+        let artista = unquiFy.getArtistById(albumBody.artistId);
+        if(artista === undefined ){
+            throw new ArtistNotFound()
+            process.exit(-1)
+        };
+
+        if(unquiFy.albumRepetido(albumBody.name)){
+            /*let error = new AlreadyExistsError()
+            res.json({ status: error.status,
+                errorCode: error.errorCode
+             })*/
+             throw new AlreadyExistsError();
+             process.exit(-1);
+            };
+
+        //let albu = new Album(artista,albumBody.name, albumBody.year)
+        let albumId = unquiFy.addAlbum(artista.name,albumBody);
+        console.log(albumId);
+        saveUNQfy(unquiFy, 'estado');
+        let albumJSON = albumId.toJSON();
+        res.json(albumJSON);
+
+    });    
+    
 app.use(errorHandler);
 app.listen(port);
 console.log('Magic happens on port ' + port);    
