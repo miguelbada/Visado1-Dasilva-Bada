@@ -4,12 +4,22 @@
   <img src="uml.png" />
 </p>
 
-## VISADO 2 MUXIMACHT COMANDOS
+## VISADO 2
+## MUXIMACHT COMANDOS
 ### node main.js addArtist "Charly Garcia" "Argentina"
 ### node main.js addAlbum "Charly Garcia" "Piano Bar" "1984"
 ### node main.js addTrack "No voy en tren" "Piano Bar" "3.12" "Rock"
 ### node main.js getLyrics "No voy en tren"
 
+##  SPOTIFY COMANDOS
+### node generateSpotifyCredentials.js
+### node main.js addArtist "Charly Garcia" "Argentina"
+### node main.js getTotalAlbumes
+### node main.js populateAlbumsForArtist "Charly Garcia"
+### node main.js getTotalAlbumes
+### node main.js getAlbumByName "Tango 4"
+
+## VISADO 1
 ## Paso A Paso los comandos a ingresar 
 ### node main.js addArtist "Pepe" "Uruguay"
 ### node main.js addArtist "Carlos Gardel" "Uruguay"

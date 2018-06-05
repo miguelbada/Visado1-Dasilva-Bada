@@ -47,16 +47,16 @@ class UNQfy {
     this.artistas = rest;
   }
 
-  deleteAlbumById(id){
+  deleteAlbumById(id) {
     let album = this.getAlbumById(id);
     console.log(album);
     let artista = album.artista
     artista.deleteAlbum(album.albumID);
   }
 
-  albumRepetido(nameAlbum){
+  albumRepetido(nameAlbum) {
     let boolean = false;
-    boolean = this.getAllAlbunes().some((alb)=> alb.name === nameAlbum);
+    boolean = this.getAllAlbunes().some((alb) => alb.name === nameAlbum);
     return boolean;
   };
 
@@ -67,11 +67,11 @@ class UNQfy {
     return boolean
 
   }
-  searchAlbumByName(name){
+  searchAlbumByName(name) {
     let allAlbums = this.getAllAlbunes();
-    if(allAlbums != []){
-      let res = allAlbums.filter((album)=> this.containsName(album.name,name));
-      let resJSON = res.map((album)=> album.toJSON());
+    if (allAlbums != []) {
+      let res = allAlbums.filter((album) => this.containsName(album.name, name));
+      let resJSON = res.map((album) => album.toJSON());
       return resJSON;
     }
 
@@ -141,7 +141,7 @@ class UNQfy {
     } else {
       let nuevoAlbun = new Album(artista, params.name, params.year);
       nuevoAlbun.albumID = this.contadorId
-      this.contadorId+=1
+      this.contadorId += 1
       artista.albumes.push(nuevoAlbun);
       return nuevoAlbun
     }
@@ -216,7 +216,7 @@ class UNQfy {
     return artista;
   }
 
-  getAlbumById(id){
+  getAlbumById(id) {
     let albumes = this.getAllAlbunes();
     let album = albumes.find(album => album.albumID === id);
     return album;
@@ -224,13 +224,13 @@ class UNQfy {
 
   getAlbumByName(name) {
     let albumes = this.getAllAlbunes()
-    console.log(albumes)
     let album;
     album = albumes.find(album => album.name === name);
 
     if (album === undefined) {
       this.albumNoEncontrado(name);
     } else {
+      console.log(album);
       return album;
     }
   }
@@ -255,54 +255,63 @@ class UNQfy {
       return playlist
     }
   }
-  getLyrics(nombreTrack){
-    let track = this.getTrackByName(nombreTrack)
-    if(track.lyrics === null){
-      const rp = require('request-promise');
-      const option ={
+
+  // Api Key Miguel: e526a0cccce03e69d29dac02c599fd49
+  getLyrics(nombreTrack) {
+    const key = '44e25018083ffd40c281dad1e7c2128d';
+    let track = this.getTrackByName(nombreTrack);
+    if (track.lyrics === null) {
+      const option = {
         url: 'http://api.musixmatch.com/ws/1.1/track.search',
-        qs:{
+        qs: {
           q_track: track.name,
-          apikey:'44e25018083ffd40c281dad1e7c2128d'
+          apikey: key
         },
         json: true,
-      }
+      };
       rp.get(option)
-        .then((body)=>{
-        console.log(body);
-        let tracks = body.message.body.track_list;
-        let track = tracks[0].track;
-        console.log(track);
-        return track;})
-        .then((pista)=>{ 
-        const option2 ={
-          url: 'https://developer.musixmatch.com/documentation/api-reference/track-lyrics-get',
-          qs:{
-            track_id: pista.track_id,
-            apikey:'44e25018083ffd40c281dad1e7c2128d'
-           },
-          json: true,
-        };
-        return rp.get(option2);})
-        .then((data)=>{ 
-          console.log(data)
-           // console.log("ERROR"+ error.message)
-           // process.exit(-1)
-          let trackLytics = data.lyrics_body
-          track.lyrics = trackLytics
+        .then((allTracks) => {
+          let tracks = allTracks.message.body.track_list;
+          let track = tracks[0].track;
+          console.log(track.track_id);
+
+          return track.track_id;
+        })
+        .then((pistaId) => {
+          const option2 = {
+            url: 'http://api.musixmatch.com/ws/1.1/track.lyrics.get',
+            qs: {
+              track_id: pistaId,
+              apikey: key
+            },
+            json: true,
+          };
+          
+          const lyrics = rp.get(option2);
+          console.log(lyrics);
+          return lyrics;
+        })
+        .then((data) => {
+          //console.log(data)
+          // console.log("ERROR"+ error.message)
+          // process.exit(-1)
+          let trackLyrics = data;
+          //console.log(trackLyrics);
+          track.lyrics = trackLyrics;
           this.save(this, 'estado');
           return track.lyrics;
-           })
-          .catch((error) => {
-            if (error) {
-              console.log("Error" + error.message)
-              process.exit(-1)
-            }
-          }); 
-    }else{
-          return track.lyrics;
-        }
+        })
+        .catch((error) => {
+          if (error) {
+            //Sconsole.log("Error" + error.message)
+            process.exit(-1)
+          }
+        });
+    } else {
+      return track.lyrics;
+    }
   };
+
   populateAlbumsForArtist(artisname) {
     const options = {
       url: 'https://api.spotify.com/v1/search',
@@ -317,9 +326,8 @@ class UNQfy {
 
     let albumes = rp.get(options)
       .then((artistas) => {
-        console.log(artistas);    //El acces token expiro
+        console.log("Albumes del artista " + artistas.artists.items[0].name);    //El acces token expiro
         return artistas.artists.items[0];
-        console.log(artist);
       })
       .then((artista) => {
         const options2 = {
@@ -328,19 +336,29 @@ class UNQfy {
           json: true,
         }
 
-        return rp.get(options2)
+        return rp.get(options2);
       })
       .then((albums) => {
         console.log("La cantidad de albumes es: " + albums.items.length);
+        console.log();
+        this.printAlbumSpotyfy(albums);
         let albumes = albums.items;
         let artista = this.getArtistByName(artisname);
-        let listaAlbum = albumes.map((album) => {
-        this.mkReduceAlbum(artista, album);
-        });
-        console.log(listaAlbum);
-        artista.albumes = artista.albumes.concat(listaAlbum);
+        console.log(artista);
+
+        let albumsConc = this.mkReduceAlbumL(artista, albums.items);
         
-        console.log("luego de la concatenacion el largo es: " + artista.albumes);
+        //let albumsConc = [];
+        //albumsConc.push(this.mkReduceAlbum(artista, albums.items[0]));
+        //albumsConc.push(this.mkReduceAlbum(artista, albums.items[1]));
+
+        //let listaAlbum = albumes.map((album) => {
+         // this.mkReduceAlbum(artista, album);
+        //});
+        console.log(albumsConc);
+        artista.albumes = artista.albumes.concat(albumsConc);
+
+        console.log("luego de la concatenacion el largo es: " + artista.albumes.length);
       })
       .then(() => {
         let filename = 'unqfy.json';
@@ -348,7 +366,7 @@ class UNQfy {
       })
       .catch((error) => {
         if (error) {
-          console.log("Error" + error.message)
+          console.log("Error" + error.message);
           process.exit(-1)
         }
       });
@@ -359,6 +377,32 @@ class UNQfy {
   //allUndefined(array) {
   //  return array.every(a => a === undefined)
   //}
+
+  mkReduceAlbumL(artista, albumsSpoty){
+    album = [];
+    for(var i=0; i<albumsSpoty.length; i++){
+      album.push(this.mkReduceAlbum(artista, albumsSpoty[i]));
+    }
+
+    return album;
+  }
+  
+  mkReduceAlbum(artista, fullAlbum) {
+    let album = new Album(artista, fullAlbum.name, parseInt(fullAlbum.release_date))
+    album.albumID = this.contadorId;
+    this.contadorId += 1;
+
+    return album;
+  }
+
+  printAlbumSpotyfy(listAlbum){
+    for(var i=0; i<listAlbum.items.length; i++){
+      console.log("Artista del Album: " + listAlbum.items[i].artists[0].name);
+      console.log("Nombre del Album: " + listAlbum.items[i].name);
+      console.log("Año del Album: " + listAlbum.items[i].release_date);
+      console.log();
+    }
+  }
 
   artistaNoEncontrado(name) {
     return console.log("El Artista " + "¨" + name + "¨" + " No Existe!");
@@ -383,14 +427,6 @@ class UNQfy {
     const accessToken = JSON.parse(data).access_token;
 
     return accessToken;
-  }
-
-  mkReduceAlbum(artista, fullAlbum){
-    let album = new Album(artista, fullAlbum.name, parseInt(fullAlbum.release_date))
-    album.albumID = this.contadorId;
-    this.contadorId += 1;
-
-    return album;
   }
 
   save(filename = 'unqfy.json') {
