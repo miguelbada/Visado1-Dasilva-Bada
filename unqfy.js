@@ -273,7 +273,7 @@ class UNQfy {
         .then((allTracks) => {
           let tracks = allTracks.message.body.track_list;
           let track = tracks[0].track;
-          console.log(track.track_id);
+          console.log("El id del track " + nombreTrack + " es: " + track.track_id);
 
           return track.track_id;
         })
@@ -287,18 +287,20 @@ class UNQfy {
             json: true,
           };
           
-          const lyrics = rp.get(option2);
-          console.log(lyrics);
-          return lyrics;
+           return rp.get(option2);
+     
         })
-        .then((data) => {
-          //console.log(data)
+        .then((lyrics) => {
+        console.log(lyrics.message.body.lyrics.lyrics_body);
           // console.log("ERROR"+ error.message)
           // process.exit(-1)
-          let trackLyrics = data;
+          let trackLyrics = lyrics.message.body.lyrics.lyrics_body;
           //console.log(trackLyrics);
           track.lyrics = trackLyrics;
-          this.save(this, 'estado');
+          console.log("Antes de guardar");
+          let filename = 'estado';
+          this.save(filename);
+          console.log("Guardado exitoso");
           return track.lyrics;
         })
         .catch((error) => {
@@ -361,7 +363,7 @@ class UNQfy {
         console.log("luego de la concatenacion el largo es: " + artista.albumes.length);
       })
       .then(() => {
-        let filename = 'unqfy.json';
+        let filename = 'estado';
         this.save(filename);
       })
       .catch((error) => {
