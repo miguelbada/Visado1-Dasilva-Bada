@@ -4,7 +4,8 @@ const unqmod = require('./unqfy');
 let errors = require('./Errors');
 let ApiError = errors.APIError;
 let NotFound = errors.NotFound;
-let unquiFy = getUNQfy('estado');
+//let unquiFy = getUNQfy('estado');
+const nodemailer = require('nodemailer'); 
 
 function getUNQfy(filename) { 
     let unqfy = new unqmod.UNQfy();
@@ -16,7 +17,7 @@ function getUNQfy(filename) {
 
 
 
-
+//"nodemailer": "^4.6.7",
 class ParIdEmail{
     constructor(id){
         this.idArtist = id;
@@ -24,11 +25,17 @@ class ParIdEmail{
     }
 
     agregarEmail(emailsUser){
-    this.emailsUsers.push(emailsUser);
+        if(!(this.emailsUsers.filter(e => e === emailsUser).length > 0)){ 
+        this.emailsUsers.push(emailsUser);
+        }
     }
 
     sacarEmail(emailsUser){
    this.emailsUsers= this.emailsUsers.filter((mailUser) => mailUser != emailsUser)
+    }
+
+    setearEmails(listEmail){
+        this.emailsUsers = [];
     }
 
 };
@@ -36,34 +43,57 @@ class ParIdEmail{
 
 class Notificador{
     
-    constructor(){
+    constructor(unq){
+        this.unquiFy = unq
         this.mapaDeSuscriptores = [];
     }
 
+    notificarUsuarios(artistId){
+
+    }
     getsEmailsArtistIdFromMap(artist){
-       // [""+ artista.artistId]
        let  parIdEm = this.mapaDeSuscriptores.find(pares=> pares.idArtist === artist.artistId)
        if(parIdEm === undefined){
         parIdEm = new  ParIdEmail(artist.artistId)
+        this.mapaDeSuscriptores.push(parIdEm)
        }
        return parIdEm;
     }
-  
-    suscribirseAUnArtista(artistName,mailUsuario){
-        let artista= this.unquiFy.getArtistByName(artistName)
+    
+
+    getsEmails(artistID){
+        let artista= this.unquiFy.getArtistById(artistID)
+        if(artista === undefined){
+            throw new NotFound();     
+        }
+        return this.getsEmailsArtistIdFromMap(artista)
+    }
+
+    deleteEmails(artistID){
+        let artista= this.unquiFy.getArtistById(artistID)
+        if(artista === undefined){
+            throw new NotFound();     
+        }
+        this.getsEmailsArtistIdFromMap(artista).setearEmails([]);
+    }
+
+    suscribirseAUnArtista(artistID,mailUsuario){
+        let artista= this.unquiFy.getArtistById(artistID)
         if(artista=== undefined){
             throw new NotFound();     
         }
         this.getsEmailsArtistIdFromMap(artista).agregarEmail(mailUsuario)
+        console.log(this.mapaDeSuscriptores)
         
     }
 
-    desubscribirseAUnArtista(artistname,mailUsuario){
-        let artista= this.unquiFy.getArtistByName(artistName)
+    desubscribirseAUnArtista(artistID,mailUsuario){
+        let artista= this.unquiFy.getArtistById(artistID)
         if(artista=== undefined){
             throw new NotFound();     
         }
         this.getsEmailsArtistIdFromMap(artista).sacarEmail(mailUsuario)
+        console.log(this.mapaDeSuscriptores)
     }
 
     eliminarArtistSuscribe(artista){

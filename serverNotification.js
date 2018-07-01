@@ -1,14 +1,43 @@
 let express    = require('express');        // call express
 let app        = express();                 // define our app using express
 let bodyParser = require('body-parser');
+const fs = require('fs');
 
 let notificadore = require('./Notificador');
-let Notificador = notificadore.Notificador;
+
+// Retorna una instancia de Noritidacor. Si existe filename, recupera la instancia desde el archivo.
+function getNotificador(filename) {
+    let noti = new Notificador();
+    if (fs.existsSync(filename)) {
+        console.log();
+        noti = noti.load(filename);
+    }
+    return noti;
+}
+
+// Guarda el estado de Notificador en filename
+function saveNotificador(noti, filename) {
+    console.log();
+    noti.save(filename);
+}
+let unqmod = require('./unqfy');
+let unquiFy = getUNQfy('estado');
+
+function getUNQfy(filename) { 
+    let unqfy = new unqmod.UNQfy();
+    if (fs.existsSync(filename)) {
+      console.log();
+      unqfy = unqmod.UNQfy.load(filename);
+    }
+    return unqfy;};
+
+let notificador = new notificadore.Notificador(unquiFy)
+
 let errors = require('./Errors');
 let ApiError = errors.APIError;
 let NotFound = errors.NotFound;
 
-let notificador = new Notificador()
+
 
 
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -46,20 +75,46 @@ app.use((req,res,next)=>{
 });
 
 router.post('/subscribe',function (req, res,next){
-    let artBody = req.body
-    console.log(artBody)
-    try{
-        console.log("Entra")
-        console.log(notificador)
-        notificador.suscribirseAUnArtista(body.artistId)
-        console(notificador)
-        res.json(); 
-    }
-    catch(err){
-        res.json(err); 
-    } 
-
+    let artBody = req.body;
+    console.log(artBody);
+    //try{ 
+    notificador.suscribirseAUnArtista(artBody.artistId, artBody.email);
+    //console(notificador.mapaDeSuscriptores);
+    res.json(); 
+    //}
+    //catch(err){
+    //    console.log(err)
+    //    err;
+    //}
 });
+
+router.post('/unsubscribe',function (req, res,next){
+    let artBody = req.body;
+    console.log(artBody);
+    notificador.desubscribirseAUnArtista(artBody.artistId, artBody.email);
+    res.json();
+});
+
+router.post('/notify',function (req, res,next){
+    res.json();
+});
+
+router.get('/subscriptions/:artistId',function (req, res) {
+        let artId = parseInt(req.params.artistId);
+        console.log(artId)
+        let parIdEm = notificador.getsEmails(artId)
+        res.json({
+            "artistId": parIdEm.idArtist,
+            "emails": parIdEm.emailsUsers
+        });
+        });
+router.delete('/subscriptions/:artistId',function (req, res) { 
+    let artId = parseInt(req.params.artistId);
+    console.log(artId)
+    notificador.deleteEmails(artId);
+    res.json();
+});
+
 // START THE SERVER
 // =============================================================================
 app.use(errorHandler);
