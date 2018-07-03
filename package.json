@@ -10,6 +10,7 @@
     "package-lock.json": "^1.0.0",
     "package.json": "^2.0.1",
     "picklejs": "github:lwoites/picklejs",
+    "nodemailer": "^4.6.7",
     "request": "^2.87.0",
     "request-promise": "^4.2.2"
   },

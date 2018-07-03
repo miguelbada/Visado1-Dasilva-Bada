@@ -1,11 +1,23 @@
 const fs = require('fs'); // necesitado para guardar/cargar unqfy
 const unqmod = require('./unqfy');
-
+const rp = require('request-promise');
 let errors = require('./Errors');
-let ApiError = errors.APIError;
 let NotFound = errors.NotFound;
+const urlUnquyRest = "http://localhost:5000/api";
 //let unquiFy = getUNQfy('estado');
-const nodemailer = require('nodemailer'); 
+let ServerInternalError = errors.InternalServerError;
+const nodemailer = require('nodemailer');
+// create reusable transporter object using the default SMTP transport
+const transporter = nodemailer.createTransport({
+host: 'smtp.gmail.com', // server para enviar mail desde gmail
+port: 587,
+secure: false, // true for 465, false for other ports
+auth: {
+user: 'notificadordeusuario9580@gmail.com',
+pass: 'clave9580',
+},
+});
+
 
 function getUNQfy(filename) { 
     let unqfy = new unqmod.UNQfy();
@@ -48,8 +60,26 @@ class Notificador{
         this.mapaDeSuscriptores = [];
     }
 
-    notificarUsuarios(artistId){
-
+    notificarUsuarios(param){
+        let artista = this.verificarSiExisteArtista(param.artistId);
+        let emails = this.getsEmailsArtistIdFromMap(artista).emailsUsers;
+        
+        for (var i = 0; i <emails.length; i++) {
+            const mailOptions = {
+                from: param.from, // sender address
+                to: emails[i], // list of receivers
+                subject: param.subject, // Subject lin
+                text: param.message, // plain text body
+                html: '<b>Hello world?</b>' // html body
+                };
+                transporter.sendMail(mailOptions).then(() => {console.log("Emails enviados");})
+                .catch((error) => {
+                    if (error) {
+                      console.log("Error" + error.message);
+                    throw new ServerInternalError;
+                    }
+                  });; 
+        } 
     }
     getsEmailsArtistIdFromMap(artist){
        let  parIdEm = this.mapaDeSuscriptores.find(pares=> pares.idArtist === artist.artistId)
@@ -103,6 +133,23 @@ class Notificador{
         }
         this.mapaDeSuscriptores= this.mapaDeSuscriptores.filter((pares) => pares.idArtist != artista.artistId)
 
+    }
+
+    verificarSiExisteArtista(artistId){
+        const options = {
+            url: urlUnquyRest + "/artists/:id",
+            qs: {
+                id: artistId,
+               
+            },
+            json: true,
+          };
+          return rp.get(options).catch((error) => {
+            if (error) {
+              console.log("Error" + error.message);
+            throw new NotFound;
+            }
+          });; 
     }
     
 };

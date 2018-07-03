@@ -3,6 +3,9 @@ const fs = require('fs');
 const picklejs = require('picklejs');
 const rp = require('request-promise');
 
+const ob = require('./Observable');
+let Observable = ob.Observable;
+
 let artista = require('./JavaScript/Artista');
 let Artista = artista.Artista;
 
@@ -16,8 +19,9 @@ let playList = require('./JavaScript/Playlist');
 let Playlist = playList.Playlist;
 
 
-class UNQfy {
+class UNQfy extends Observable{
   constructor() {
+    super();
     this.artistas = [];
     this.playlist = [];
     this.contadorId = 1;
@@ -143,6 +147,7 @@ class UNQfy {
       nuevoAlbun.albumID = this.contadorId
       this.contadorId += 1
       artista.albumes.push(nuevoAlbun);
+      this.change(artista, nuevoAlbun);
       return nuevoAlbun
     }
   }

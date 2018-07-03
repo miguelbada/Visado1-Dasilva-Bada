@@ -4,22 +4,6 @@ let bodyParser = require('body-parser');
 const fs = require('fs');
 
 let notificadore = require('./Notificador');
-
-// Retorna una instancia de Noritidacor. Si existe filename, recupera la instancia desde el archivo.
-function getNotificador(filename) {
-    let noti = new Notificador();
-    if (fs.existsSync(filename)) {
-        console.log();
-        noti = noti.load(filename);
-    }
-    return noti;
-}
-
-// Guarda el estado de Notificador en filename
-function saveNotificador(noti, filename) {
-    console.log();
-    noti.save(filename);
-}
 let unqmod = require('./unqfy');
 let unquiFy = getUNQfy('estado');
 
@@ -32,7 +16,6 @@ function getUNQfy(filename) {
     return unqfy;};
 
 let notificador = new notificadore.Notificador(unquiFy)
-
 let errors = require('./Errors');
 let ApiError = errors.APIError;
 let NotFound = errors.NotFound;
@@ -96,6 +79,9 @@ router.post('/unsubscribe',function (req, res,next){
 });
 
 router.post('/notify',function (req, res,next){
+    let body = req.body;
+    console.log(body);
+    notificador.notificarUsuarios(body);
     res.json();
 });
 
