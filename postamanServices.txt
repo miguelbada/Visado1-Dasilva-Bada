@@ -1,0 +1,24 @@
+Post http://localhost:8080/api/subscribe
+{ "artistId": 1,   "email": "gastonCss_16@hotmail.com" 
+	
+}
+
+Post http://localhost:8080/api/unsubscribe
+{ "artistId": 1,   "email": "unemail1@unDominio.com" 
+	
+}
+
+
+Get http://localhost:8080/api/subscriptions/1
+
+DELETE http://localhost:8080/api/subscriptions/1
+
+Post http://localhost:8080/api/notify
+
+{"artistId": 1,   
+
+"subject": "Nuevo Album para artsta Chano",   
+
+"message": "Se ha agregado el album XXX al artista Chano",    
+
+"from": "notificadordeusuario9580@gmail.com" }

@@ -4,21 +4,13 @@ let bodyParser = require('body-parser');
 const fs = require('fs');
 
 let notificadore = require('./Notificador');
-let unqmod = require('./unqfy');
-let unquiFy = getUNQfy('estado');
 
-function getUNQfy(filename) { 
-    let unqfy = new unqmod.UNQfy();
-    if (fs.existsSync(filename)) {
-      console.log();
-      unqfy = unqmod.UNQfy.load(filename);
-    }
-    return unqfy;};
 
-let notificador = new notificadore.Notificador(unquiFy)
+let notificador = new notificadore.Notificador()
 let errors = require('./Errors');
 let ApiError = errors.APIError;
 let NotFound = errors.NotFound;
+let InvalidInputError = errors.InvalidInputError
 
 
 
@@ -60,45 +52,99 @@ app.use((req,res,next)=>{
 router.post('/subscribe',function (req, res,next){
     let artBody = req.body;
     console.log(artBody);
-    //try{ 
-    notificador.suscribirseAUnArtista(artBody.artistId, artBody.email);
-    //console(notificador.mapaDeSuscriptores);
-    res.json(); 
-    //}
-    //catch(err){
-    //    console.log(err)
-    //    err;
-    //}
+
+    if(!(artBody.artistId && artBody.email)){
+        throw new InvalidInputError();
+    }
+    notificador.suscribirseAUnArtista(artBody.artistId, artBody.email)
+    .then(()=>{
+        res.json();
+    })
+    .catch((error) => {
+        if (error) {
+          console.log("Error " + error.message);
+          res.status(error.status);
+          res.json({status: error.status, errorCode: error.errorCode});
+        }
+      });
 });
 
 router.post('/unsubscribe',function (req, res,next){
     let artBody = req.body;
     console.log(artBody);
-    notificador.desubscribirseAUnArtista(artBody.artistId, artBody.email);
-    res.json();
+    if(!(artBody.artistId && artBody.email)){
+        throw new InvalidInputError();
+    }
+    notificador.desubscribirseAUnArtista(artBody.artistId, artBody.email)
+    .then(()=>{
+        res.json();
+    })
+    .catch((error) => {
+        if (error) {
+          console.log("Error " + error.message);
+          res.status(error.status);
+          res.json({status: error.status, errorCode: error.errorCode});
+        }
+      });
 });
 
 router.post('/notify',function (req, res,next){
     let body = req.body;
     console.log(body);
-    notificador.notificarUsuarios(body);
-    res.json();
+    if(!(body.artistId && body.subject && body.message && body.from)){
+        throw new InvalidInputError();
+    }
+    notificador.notificarUsuarios(body)
+    .then(()=>{
+        res.json();
+    })
+    .catch((error) => {
+        if (error) {
+          console.log("Error " + error.message);
+          res.status(error.status);
+          res.json({status: error.status, errorCode: error.errorCode});
+        }
+      });
 });
 
 router.get('/subscriptions/:artistId',function (req, res) {
+        if(!(req.params.artistId)){
+            throw new InvalidInputError();
+         }
         let artId = parseInt(req.params.artistId);
         console.log(artId)
-        let parIdEm = notificador.getsEmails(artId)
-        res.json({
-            "artistId": parIdEm.idArtist,
-            "emails": parIdEm.emailsUsers
-        });
+         notificador.getsEmails(artId)
+        .then((parIdEm)=>{
+            res.json({
+                "artistId": parIdEm.idArtist,
+                "emails": parIdEm.emailsUsers
+            });
+    })
+    .catch((error) => {
+        if (error) {
+          console.log("Error " + error.message);
+          res.status(error.status);
+          res.json({status: error.status, errorCode: error.errorCode});
+        }
+      });
+        
+
+
         });
 router.delete('/subscriptions/:artistId',function (req, res) { 
     let artId = parseInt(req.params.artistId);
     console.log(artId)
-    notificador.deleteEmails(artId);
-    res.json();
+    notificador.deleteEmails(artId)
+    .then(()=>{
+        res.json();
+    })
+    .catch((error) => {
+        if (error) {
+          console.log("Error " + error.message);
+          res.status(error.status);
+          res.json({status: error.status, errorCode: error.errorCode});
+        }
+      });
 });
 
 // START THE SERVER
