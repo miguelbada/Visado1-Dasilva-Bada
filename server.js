@@ -82,7 +82,7 @@ app.use((req,res,next)=>{
 });
 
 router.get('/artists/:id',function (req, res) { 
-    //  console.log(req);
+      console.log("Parametros"+req.params.id);
       let ids =  parseInt(req.params.id) 
       console.log(ids);
       let artista = unquiFy.getArtistById(ids)

@@ -1,8 +1,7 @@
 const fs = require('fs'); // necesitado para guardar/cargar unqfy
-const unqmod = require('./unqfy');
 const rp = require('request-promise');
 let errors = require('./Errors');
-let NotFound = errors.NotFound;
+let ArtistNotFound = errors.ArtistNotFound;
 const urlUnquyRest = "http://localhost:5000/api";
 //let unquiFy = getUNQfy('estado');
 let ServerInternalError = errors.InternalServerError;
@@ -13,19 +12,10 @@ host: 'smtp.gmail.com', // server para enviar mail desde gmail
 port: 587,
 secure: false, // true for 465, false for other ports
 auth: {
-user: 'notificadordeusuario9580@gmail.com',
-pass: 'clave9580',
-},
+    user: 'notificadordeusuario9580@gmail.com',
+    pass: 'clave9580'
+}
 });
-
-
-function getUNQfy(filename) { 
-    let unqfy = new unqmod.UNQfy();
-    if (fs.existsSync(filename)) {
-      console.log();
-      unqfy = unqmod.UNQfy.load(filename);
-    }
-    return unqfy;};
 
 
 
@@ -50,41 +40,59 @@ class ParIdEmail{
         this.emailsUsers = [];
     }
 
+    transformarEnStringLosMails(){
+        let res = "";
+        let email = null;
+        for (var i = 0; i < this.emailsUsers.length; i++) {
+            email =  this.emailsUsers[i]+ ", "
+            res = res + email
+        }
+        return res
+    }
+
 };
 
 
 class Notificador{
     
-    constructor(unq){
-        this.unquiFy = unq
+    constructor(){
         this.mapaDeSuscriptores = [];
     }
 
+    
+    
     notificarUsuarios(param){
-        let artista = this.verificarSiExisteArtista(param.artistId);
-        let emails = this.getsEmailsArtistIdFromMap(artista).emailsUsers;
+        /*let artista =*/ 
+        return this.verificarSiExisteArtista(param.artistId).then((artista)=> {
+       // console.log(artista)
+            let emails = this.getsEmailsArtistIdFromMap(param.artistId);
+            let strEmails = emails.transformarEnStringLosMails();
+            console.log(strEmails)
         
-        for (var i = 0; i <emails.length; i++) {
+           // for (var i = 0; i <emails.length; i++) {
             const mailOptions = {
                 from: param.from, // sender address
-                to: emails[i], // list of receivers
+                to: strEmails, // list of receivers
                 subject: param.subject, // Subject lin
                 text: param.message, // plain text body
                 html: '<b>Hello world?</b>' // html body
                 };
-                transporter.sendMail(mailOptions).then(() => {console.log("Emails enviados");})
+           return  transporter.sendMail(mailOptions).then(() => {console.log("Emails enviados");})
                 .catch((error) => {
                     if (error) {
-                      console.log("Error" + error.message);
+                    console.log("Error" + error.message);
+                    console.log(error)
                     throw new ServerInternalError;
                     }
-                  });; 
-        } 
+                });; 
+            //}
+            
+        }); 
     }
-    getsEmailsArtistIdFromMap(artist){
-       let  parIdEm = this.mapaDeSuscriptores.find(pares=> pares.idArtist === artist.artistId)
+    getsEmailsArtistIdFromMap(artistid){
+       let  parIdEm = this.mapaDeSuscriptores.find(pares=> pares.idArtist === artistid/*artist.id*/)
        if(parIdEm === undefined){
-        parIdEm = new  ParIdEmail(artist.artistId)
+        parIdEm = new  ParIdEmail(artistid/*artist.id*/)
         this.mapaDeSuscriptores.push(parIdEm)
        }
        return parIdEm;
@@ -92,38 +100,33 @@ class Notificador{
     
 
     getsEmails(artistID){
-        let artista= this.unquiFy.getArtistById(artistID)
-        if(artista === undefined){
-            throw new NotFound();     
-        }
-        return this.getsEmailsArtistIdFromMap(artista)
+ 
+        return  this.verificarSiExisteArtista(artistID)
+        .then((artista)=> {
+            return this.getsEmailsArtistIdFromMap(artistID)
+            });
     }
 
     deleteEmails(artistID){
-        let artista= this.unquiFy.getArtistById(artistID)
-        if(artista === undefined){
-            throw new NotFound();     
-        }
-        this.getsEmailsArtistIdFromMap(artista).setearEmails([]);
+        return  this.verificarSiExisteArtista(artistID).then((artista)=> {
+        this.getsEmailsArtistIdFromMap(artistID).setearEmails([]);
+        return true});
     }
 
     suscribirseAUnArtista(artistID,mailUsuario){
-        let artista= this.unquiFy.getArtistById(artistID)
-        if(artista=== undefined){
-            throw new NotFound();     
-        }
-        this.getsEmailsArtistIdFromMap(artista).agregarEmail(mailUsuario)
+        return  this.verificarSiExisteArtista(artistID).then((artista)=> {
+        this.getsEmailsArtistIdFromMap(artistID).agregarEmail(mailUsuario)
         console.log(this.mapaDeSuscriptores)
-        
+        return true});
     }
 
     desubscribirseAUnArtista(artistID,mailUsuario){
-        let artista= this.unquiFy.getArtistById(artistID)
-        if(artista=== undefined){
-            throw new NotFound();     
-        }
-        this.getsEmailsArtistIdFromMap(artista).sacarEmail(mailUsuario)
-        console.log(this.mapaDeSuscriptores)
+        return  this.verificarSiExisteArtista(artistID)
+            .then((artista)=> {
+                this.getsEmailsArtistIdFromMap(artistID).sacarEmail(mailUsuario)
+                console.log(this.mapaDeSuscriptores)
+                return true
+            });
     }
 
     eliminarArtistSuscribe(artista){
@@ -137,19 +140,19 @@ class Notificador{
 
     verificarSiExisteArtista(artistId){
         const options = {
-            url: urlUnquyRest + "/artists/:id",
-            qs: {
-                id: artistId,
-               
-            },
+            url: urlUnquyRest + "/artists/"+artistId,
             json: true,
           };
-          return rp.get(options).catch((error) => {
+          return rp.get(options).then((artist)=>{
+            return artist
+          })
+          .catch((error) => {
             if (error) {
-              console.log("Error" + error.message);
-            throw new NotFound;
+              console.log("Error " + error.message);
+              //error
+              throw new ArtistNotFound();
             }
-          });; 
+          }); 
     }
     
 };
