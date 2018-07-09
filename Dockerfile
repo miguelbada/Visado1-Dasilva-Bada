@@ -23,6 +23,7 @@ EXPOSE 5000
 
 COPY JavaScript /home/node/my_node_app/JavaScript
 COPY ./*.js /home/node/my_node_app/
+COPY ./*.json /home/node/my_node_app/
 # Le da permisos al usuario node para escribir en /home/node/my_node_app
 # Como comentario, notar que el comando RUN nos permite ejecutar culquier comando bash valido.
 RUN chown node:users /home/node/my_node_app/
