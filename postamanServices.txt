@@ -17,7 +17,7 @@ Post http://localhost:8080/api/notify
 
 {"artistId": 1,   
 
-"subject": "Nuevo Album para artsta Chano",   
+"subject": "Nuevo Album para artista Chano",   
 
 "message": "Se ha agregado el album XXX al artista Chano",    
 

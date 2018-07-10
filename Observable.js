@@ -10,7 +10,7 @@ class Observable{
             url: urlUnquyRest + "/notify",
             body: {
                 artistId: artista.artistId,
-                subject: "Nuevo Album para artsta " + artista.name,
+                subject: "Nuevo Album para artista " + artista.name,
                 message: "Se ha agregado el album " + album.name + " al artista " + artista.name,
                 from: "notificadordeusuario9580@gmail.com",
             },
