@@ -147,7 +147,7 @@ class UNQfy extends Observable{
       nuevoAlbun.albumID = this.contadorId
       this.contadorId += 1
       artista.albumes.push(nuevoAlbun);
-      this.change(artista, nuevoAlbun);
+      this.change(artista, nuevoAlbun,"addAlbum");
       return nuevoAlbun
     }
   }
