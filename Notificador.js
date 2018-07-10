@@ -14,6 +14,9 @@ secure: false, // true for 465, false for other ports
 auth: {
     user: 'notificadordeusuario9580@gmail.com',
     pass: 'clave9580'
+},
+tls: {
+    rejectUnauthorized: false
 }
 });
 
@@ -75,7 +78,7 @@ class Notificador{
                 to: strEmails, // list of receivers
                 subject: param.subject, // Subject lin
                 text: param.message, // plain text body
-                html: '<b>Hello world?</b>' // html body
+                html: '<b>'+param.message+'</b>' // html body
                 };
            return  transporter.sendMail(mailOptions).then(() => {console.log("Emails enviados");})
                 .catch((error) => {
