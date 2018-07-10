@@ -49,4 +49,22 @@
 ### node main.js getAlbumByName "Feliz"
 ### node main.js getTrackByName "Sabroso"
 
+## VISADO 3
+
+## Para crear las imagenes en Docker
+### docker build -t server .
+
+### docker build -t server_notification -f Dockerfile_2 .
+
+### docker run -p 5000:5000 --name server_container --user node server
+
+### docker run -p 8080:8080 --name server_notification_container --user node server_notification
+
+### docker network create --subnet=172.20.0.0/16 unqfynet
+
+### docker run --net unqfynet --ip 172.20.0.21 -p 5000:5000 --name server_container --user node server
+
+###docker run --net unqfynet --ip 172.20.0.22 -p 5001:8080 --name server_notification_container --user node server_notification
+
+### docker exec -it <id> bash
   

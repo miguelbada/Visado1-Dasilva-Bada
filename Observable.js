@@ -1,5 +1,6 @@
 const rp = require('request-promise');
-const urlUnquyRest = "http://localhost:8080/api";
+//const urlUnquyRest = "http://localhost:8080/api";
+const urlUnquyRest = "http://" + "172.20.0.22" + ":" + "8080" + "/api";
 let errors = require('./Errors');
 let ServerInternalError = errors.InternalServerError;
 
